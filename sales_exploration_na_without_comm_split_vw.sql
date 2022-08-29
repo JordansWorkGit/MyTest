@@ -1,0 +1,2 @@
+CREATE VIEW prod_na_cld_osc_gold.sales_exploration_na_without_comm_split_vw AS
+SELECT * FROM prod_na_cld_osc_gold.sales_exploration_data_na_bkp
