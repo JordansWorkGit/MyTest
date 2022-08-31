@@ -1,6 +1,4 @@
-1. Invalidate_metadata
-
---release date: 21/07/2022
+1.Invalidate_metadata
 
 invalidate metadata @DB_LEVEL@_na_cld_osc_gold.opportunity_revenue_na;
 invalidate metadata @DB_LEVEL@_edm_gold.f_opportunity;
@@ -24,7 +22,7 @@ invalidate metadata @DB_LEVEL@_cld_osc_gold.osc_opportunities_revenues_v_history
 invalidate metadata @DB_LEVEL@_cld_cpq_silver.cpq_quote_lines;
 
 
-2. populate_opportunity_revenue_na
+2.populate_opportunity_revenue_na
 
 Insert overwrite @DB_LEVEL@_na_cld_osc_gold.opportunity_revenue_na 
 SELECT DISTINCT 
@@ -258,8 +256,10 @@ SELECT DISTINCT
 	upper(BillToCustomerSubClass), --so-728 new attributes addition starts
 	upper(EndCustomerSubClass),
 	upper(ShipToCustomerSubClass),
-	upper(SoldToCustomerSubClass) --so-728 new attributes addition ends
-	
+	upper(SoldToCustomerSubClass), --so-728 new attributes addition ends
+	Product_Number,
+	cpq_quote_status,
+	upper(aop_customer_sub_class)
 	FROM
 	(
 	SELECT
@@ -471,13 +471,18 @@ FROM
 			ELSE 'N'
 		END accounts_flag,
 		CASE
-		-- Want to add:				<--- 08/11/22 (not official, just github test for changes)
-		-- WHEN upper(division) like '%LATAM%' THEN 'LATAM'
+		WHEN UPPER(Division) like '%LATAM%' THEN 'LATAM'
 		WHEN upper(billtoaccounttype) = 'INTERNAL' AND upper(billtocustomercountry) = 'UNITED STATES' THEN 'INTERCOMPANY USA'
 		WHEN upper(billtoaccounttype) = 'INTERNAL' AND upper(billtocustomercountry) = 'CANADA' THEN 'INTERCOMPANY CANADA'
 		WHEN upper(billtoaccounttype) = 'INTERNAL' AND ((upper(billtocustomercountry) not in ('UNITED STATES', 'CANADA')) OR (nvl(billtocustomercountry,'N') = 'N'))  THEN 'INTERCOMPANY OTHER'
 		ELSE 'FIELD SALES'
-		END temp_motion --Modified by Hari SO-726
+		END temp_motion, --Modified by Hari SO-726
+	CASE
+	    WHEN aop_account_name = 'DELL' THEN 'NULL'
+		WHEN nvl(dc_h.customer_sub_class, 'N') != 'N' THEN dc_h.customer_sub_class
+		WHEN nvl(X.sm_sku, 'N') != 'N'  THEN 'OEM'
+		ELSE 'NULL'
+	END aop_customer_sub_class
 	FROM
 		(
 		SELECT
@@ -749,15 +754,12 @@ FROM
 				WHEN nvl(sm.sm_sku,	'N') != 'N' THEN sm.aop_account_name
 				ELSE 'Non Account'
 			END aop_account_name,			
-			'' BillToCustomerSubClass, --so-728 new attributes addition starts
-			'' EndCustomerSubClass,
-			'' ShipToCustomerSubClass,
-			'' SoldToCustomerSubClass  --so-728 new attributes addition ends
-			/* bill_acc.customer_sub_class BillToCustomerSubClass,  --so-728 new attributes addition starts
+			bill_acc.customer_sub_class BillToCustomerSubClass,  --so-728 new attributes addition starts
 			bill_acc.customer_sub_class EndCustomerSubClass,
 			bill_acc.customer_sub_class ShipToCustomerSubClass,
-			bill_acc.customer_sub_class SoldToCustomerSubClass --so-728 new attributes addition ends */
-
+			bill_acc.customer_sub_class SoldToCustomerSubClass, --so-728 new attributes addition ends 
+			a.product_num Product_Number, --SO-739 new attributes addition 
+            cpqh.status_t cpq_quote_status --SO-743 new attributes addition 
 		FROM
 			@DB_LEVEL@_edm_gold.f_opportunity a
 		LEFT OUTER JOIN @DB_LEVEL@_edm_gold.f_opportunity_extn b ON
@@ -785,6 +787,7 @@ FROM
             prd.row_wid = gph.product_wid
         LEFT OUTER JOIN ( select distinct * from 
 							(select
+							status_t,
 							opportunityid_t,
 							opportunitynumber_t,
 							transactionid_t ,
@@ -928,15 +931,15 @@ FROM
 			LEFT OUTER JOIN
 			
 			(SELECT DISTINCT
-			xref.oracle_cloud_party_id,xref.oracle_cloud_registry_id,da.definitive_id,da.nces_schid,
-			dh.*
-			FROM @DB_LEVEL@_mdm_hub_gold.d_customer_header dh 
-			JOIN @DB_LEVEL@_mdm_hub_gold.d_customer_address da ON dh.mdm_hdr_id=da.mdm_hdr_id and dh.postal_code_primary_txt=da.site_postal_code_txt
-			and	dh.address1_primary_txt = da.site_address1_txt
-			JOIN @DB_LEVEL@_mdm_hub_gold.d_customer_xref xref ON cast(dh.mdm_hdr_id as string) = xref.mdm_hdr_id
-			and xref.source_system='ORACLE'
-			) bill_acc
-			on cast(bill_acc.oracle_cloud_party_id as string) = a.customer_account_num
+            xref.oracle_cloud_party_id,xref.oracle_cloud_registry_id,da.definitive_id,da.nces_schid,
+            dh.*
+            FROM @DB_LEVEL@_mdm_hub_gold.d_customer_header dh
+            left outer JOIN @DB_LEVEL@_mdm_hub_gold.d_customer_address da ON dh.mdm_hdr_id=da.mdm_hdr_id and dh.postal_code_primary_txt=da.site_postal_code_txt
+            and dh.address1_primary_txt = da.site_address1_txt
+            left outer JOIN @DB_LEVEL@_mdm_hub_gold.d_customer_xref xref ON cast(dh.mdm_hdr_id as string) = xref.mdm_hdr_id
+            and xref.source_system='ORACLE'
+            ) bill_acc
+            on cast(bill_acc.oracle_cloud_party_id as string) = a.customer_account_num
 			-- new hub changes for so-621 END
 			
 			left outer join  @DB_LEVEL@_edm_gold.d_legacy_customer_account bill_acc_leg
@@ -1036,9 +1039,6 @@ bill_acc_leg.account_num = h.Business_Nbr
 			'Vertiv Canada',
 			'Vertiv - LATAM')
 			) x 
+	left outer join (select distinct customer_sub_class,customer_name_txt from @DB_LEVEL@_mdm_hub_gold.d_customer_header) dc_h on
+			  upper(aop_account_name) = upper(dc_h.customer_name_txt)
 			) s)s1)s2)s3;
-
-
-3. Truncate_opportunity_revenue_na
-
-Truncate table @DB_LEVEL@_na_cld_osc_gold.opportunity_revenue_na;

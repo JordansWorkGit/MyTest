@@ -1,6 +1,4 @@
-1. INVALIDATE _ METADATA
-
---release date:21/07/2022
+1.INVALIDATE _ METADATA
 
 invalidate metadata @DB_LEVEL@_na_cld_osc_gold.backlog_consolidated_data_na;
 invalidate metadata @DB_LEVEL@_edm_gold.f_sales_order_line_backlog_history;
@@ -40,8 +38,7 @@ invalidate metadata @DB_LEVEL@_ora_alice_silver.alice_oe_order_lines_all;
 invalidate metadata @DB_LEVEL@_ora_alice_silver.alice_oe_order_headers_all;
 invalidate metadata @DB_LEVEL@_edm_other_src_silver.ref_sellingmotion_accounts;
 
-
-2. INSERT_BACKLOG
+2.INSERT_BACKLOG
 
 insert overwrite @DB_LEVEL@_na_cld_osc_gold.backlog_consolidated_data_na
 select 
@@ -257,7 +254,8 @@ select
 	upper(BillToCustomerSubClass), --so-728 new attributes addition starts
 	upper(EndCustomerSubClass),
 	upper(ShipToCustomerSubClass),
-	upper(SoldToCustomerSubClass) --so-728 new attributes addition ends
+	upper(SoldToCustomerSubClass), --so-728 new attributes addition ends
+	upper(aop_customer_sub_class)
 	
 
 		
@@ -450,7 +448,13 @@ CASE
 		AND upper(recordsource) = 'ERS_HVM'
 		AND upper(billtoaccounttype) != 'INTERNAL' THEN 'ERS/HVM'
 		ELSE temp_motion
-END temp_motion2 --Modified by Hari SO-689
+END temp_motion2, --Modified by Hari SO-689
+CASE
+	    WHEN aop_account_name = 'DELL' THEN 'NULL'
+		WHEN nvl(dc_h.customer_sub_class, 'N') != 'N' THEN dc_h.customer_sub_class
+		WHEN nvl(b.sm_sku, 'N') != 'N'  THEN 'OEM'
+		ELSE 'NULL'
+	END aop_customer_sub_class
 		
 FROM
 	(
@@ -982,14 +986,10 @@ FROM
 			end_acc.services_major_acc EndServicesMajorAcc,
 			ship_acc.services_major_acc ShipToServicesMajorAcc,
 			sold_acc.services_major_acc SoldToServicesMajorAcc,  --so-665 new attributes addition ends
-			'' BillToCustomerSubClass, --so-728 new attributes addition starts
-			'' EndCustomerSubClass,
-			'' ShipToCustomerSubClass,
-			'' SoldToCustomerSubClass  --so-728 new attributes addition ends
-			/* bill_acc.customer_sub_class BillToCustomerSubClass,  --so-728 new attributes addition starts
+			bill_acc.customer_sub_class BillToCustomerSubClass,  --so-728 new attributes addition starts
 			end_acc.customer_sub_class EndCustomerSubClass,
 			ship_acc.customer_sub_class ShipToCustomerSubClass,
-			sold_acc.customer_sub_class SoldToCustomerSubClass --so-728 new attributes addition ends */
+			sold_acc.customer_sub_class SoldToCustomerSubClass --so-728 new attributes addition ends 
 			
 		FROM
 			(
@@ -1632,6 +1632,9 @@ nvl(bill_acc.customer_number,bill_acc_leg.account_num) = h.Business_Nbr
           AND egp1.organization_id = item_eff.organization_id
           where  item_eff.context_code like '%OEM%'
           and user_item_type = 'Finished Good')so on a.sku = so.item_number
-		) b )dt )tt )st)s1;
+		) b 
+		left outer join (select distinct customer_sub_class,customer_name_txt from @DB_LEVEL@_mdm_hub_gold.d_customer_header) dc_h on
+			  upper(aop_account_name) = upper(dc_h.customer_name_txt)
+		)dt )tt )st)s1;
 			
 Invalidate metadata @DB_LEVEL@_na_cld_osc_gold.backlog_consolidated_data_na;

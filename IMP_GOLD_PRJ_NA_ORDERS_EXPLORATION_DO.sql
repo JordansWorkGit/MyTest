@@ -1,6 +1,6 @@
-1. INVALIDATE METADATA
+1.INVALIDATE METADATA
 
---release date: 26/07/2022
+
 
 invalidate metadata @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_tmp;
 invalidate metadata @DB_LEVEL@_edm_gold.f_sales_order_line;
@@ -78,7 +78,8 @@ invalidate metadata @DB_LEVEL@_geist_silver.geist_eplant;
 invalidate metadata @DB_LEVEL@_geist_silver.geist_currency;
 
 
-2. orders_exploration_data_na_tmp
+
+2.orders_exploration_data_na_tmp
 
 insert overwrite @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_tmp
 select
@@ -282,7 +283,7 @@ where upper(a.sales_order_status_cd) not in ('FORECASTED ORDER','ENTERED','IR IS
 compute stats @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_tmp;
 
 
-3. Insert_into_orders_exploration
+3.Insert_into_orders_exploration
 
 
 insert overwrite @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na
@@ -521,7 +522,8 @@ SELECT
 	upper(BillToCustomerSubClass), --so-728 new attributes addition starts
     upper(EndCustomerSubClass),
     upper(ShipToCustomerSubClass),
-    upper(SoldToCustomerSubClass) --so-728 new attributes addition ends
+    upper(SoldToCustomerSubClass), --so-728 new attributes addition ends
+	upper(aop_customer_sub_class)
 from (
   SELECT
 	*,
@@ -728,7 +730,13 @@ CASE
 		    AND upper(recordsource) = 'ERS_HVM'
 		    AND upper(billtoaccounttype) != 'INTERNAL' THEN 'ERS/HVM'
 		    ELSE temp_motion
-	        END temp_motion2 --Modified by Hari SO-689
+	        END temp_motion2, --Modified by Hari SO-689
+		CASE
+			WHEN aop_account_name = 'DELL' THEN 'NULL'
+			WHEN nvl(dc_h.customer_sub_class, 'N') != 'N' THEN dc_h.customer_sub_class
+			WHEN nvl(b.sm_sku, 'N') != 'N'  THEN 'OEM'
+			ELSE 'NULL'
+		END aop_customer_sub_class
 FROM
 	(
 	SELECT
@@ -1320,14 +1328,10 @@ FROM
 			end_acc.services_major_acc EndServicesMajorAcc,
 			ship_acc.services_major_acc ShipToServicesMajorAcc,
 			sold_acc.services_major_acc SoldToServicesMajorAcc,--so-665 new attributes addition ends
-			'' BillToCustomerSubClass, --so-728 new attributes addition starts
-			'' EndCustomerSubClass,
-			'' ShipToCustomerSubClass,
-			'' SoldToCustomerSubClass --so-728 new attributes addition ends
-			/* bill_acc.customer_sub_class BillToCustomerSubClass, --so-728 new attributes addition starts
+			bill_acc.customer_sub_class BillToCustomerSubClass, --so-728 new attributes addition starts
 			end_acc.customer_sub_class EndCustomerSubClass,
 			ship_acc.customer_sub_class ShipToCustomerSubClass,
-			sold_acc.customer_sub_class SoldToCustomerSubClass --so-728 new attributes addition ends */
+			sold_acc.customer_sub_class SoldToCustomerSubClass --so-728 new attributes addition ends 
 
 
 			
@@ -1925,12 +1929,293 @@ LEFT OUTER JOIN
 			group by a.salesordernumber, a.orderexlinenumber, a.lob, a.gbu 
 		) sn on a.salesordernumber = sn.salesordernumber and a.orderexlinenumber = sn.orderexlinenumber and a.lob = sn.lob and a.gbu = sn.gbu 
 		) b 
+		 left outer join (select distinct customer_sub_class,customer_name_txt from @DB_LEVEL@_mdm_hub_gold.d_customer_header) dc_h on
+				  upper(aop_account_name) = upper(dc_h.customer_name_txt)
 		)dt )tt )st)s1;
 		
-		--Query created by Kedar for Geist data 06/06/2022
-		--salesOps requirement
-		insert into @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na
-		select
+	--Query created by Kedar for Geist data 06/06/2022
+	--salesOps requirement
+	insert into @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na
+		
+	SELECT
+    account_type_aop,
+	AccountAM,
+	AccountCSM,
+	AccountLead,
+	AccountPresence,
+	AccountServiceSales,
+	AccountSubType,
+	AccountType,
+	AOP_Account_Name,
+	AOP_Category,
+	BillToAccountRole,
+	BillToCustomer,
+	BillToCustomerAddress,
+	BillToCustomerCustomerType1,
+	BillToCustomerEnterpriseIndustry,
+	BillToCustomerGSC,
+	BillToCustomerIndustry1,
+	BillToCustomerName,
+	BillToCustomerName2,
+	BillToCustomerNumber,
+	BillToCustomerParentAccount,
+	BillToCustomerPostalCode,
+	BillToCustomerStandardizedName,
+	BillToCustomerVertical,
+	bsid,
+	ChannelFlag,	
+	COE,
+	COE_New,
+	ContractType,
+	CustomerPurchaseOrderNumber,
+	CustomerRequestDate,
+	Data_Last_Refreshed,
+	EndCustomer,
+	EndCustomerAccountRole,
+	EndCustomerAddress,
+	EndCustomerCity,
+	EndCustomerCountry,
+	EndCustomerCustomerType1,
+	EndCustomerEnterpriseIndustry,
+	EndCustomerGSC,
+	EndCustomerIndustry1,
+	EndCustomerName,
+	EndCustomerNumber,
+	EndCustomerParentAccount,
+	EndCustomerPostalCode,
+	EndCustomerStandardizedExists,
+	EndCustomerStandardizedName,
+	EndCustomerState,
+	EndCustomerState2,
+	EndCustomerVertical,
+	ExchangeRateUsed,
+	ExtendedListPrice,
+	GBU,
+	growth_target,
+	alicecommissionoverridepercent,
+	Level_6,
+	ListPrice,
+	LOB,
+	NetSalesRevenue,
+	Office_Group,
+	office_website,
+	OrderCoordinator,
+	OrderCreateDate,
+	OrderLastUpdateDate,
+	OrderEXLineNumber,
+	PartnerWebFolderID,
+	PartnerWebQuoteNumber,
+	Plant,
+	PlantDescription,
+	Product_Category,
+	Product_Category_New,
+	Product_Family,
+	Product_Family_New,
+	PROShipmentNumber,
+	QuantityOrdered,
+	quoteid,
+	RecordSource,
+	SalesOfficeName,
+	SalesOfficeNumber,
+	SalesOfficePrincipalEmail,
+	SalesOfficeReferenceNumber,
+	SalesOrderNumber,
+	SalesRegionName,
+	SalesRegionNumber,
+	SalesRepEmail,
+	SalesRepID,
+	SalesRepName,
+	SalesRepType,
+	SAPOEMTag,
+	Selling_Motion,
+	OrderDeliveryPromisedDate,
+	Segment,
+	SFR_Category,
+	ShipDate,
+	ShipmentCarrierName,
+	ShippedQuantity,
+	ShipToCustomerAddress,
+	ShipToCustomerCountry,
+	ShipToCustomerCustomerType1,
+	ShipToCustomerEnterpriseIndustry,
+	ShipToCustomerGSC,
+	ShipToCustomerIndustry1,
+	ShipToCustomerName,
+	ShipToCustomerNumber,
+	ShipToCustomerParentAccount,
+	ShipToCustomerStandardizedName,
+	ShipToCustomerVertical,
+	sizecategory,
+	SKU,
+	SKUDescription,
+	SMSBatteriesOnlyFlag,
+	SMSBatteryRBSM,
+	SMSContractEndDate,
+	SMSContractExpireDate,
+	SMSContractPMs,
+	SMSContractSequence,
+	SMSContractStartDate,
+	SMSContractStatus,
+	SMSCustomerType,
+	SMSEquipmentSegment,
+	SMSRevCat,
+	SMSSiteId,
+	SMSStackedWhenBooked,
+	SMSTagNumber,
+	SMSTicketNumber,
+	SMSTicketType,
+	SoldToCustomerCustomerType1,
+	SoldToCustomerEnterpriseIndustry,
+	SoldToCustomerGSC,
+	SoldToCustomerIndustry1,
+	SoldToCustomerName,
+	SoldToCustomerParentAccount,
+	SoldToCustomerStandardizedName,
+	SoldToCustomerVertical,
+	SPEED_DIAL,
+	Sales_Area,
+	effective_user() as w_insert_by,
+	now() as w_insert_dtm,
+    'SalesOps' as src_system_name,
+    resellernumber,
+	resellerbranchnumber,
+	resellerbranchname,
+	office_type,
+	uom,
+	sales_order_line_type,
+	Order_type,
+	Class_code,
+	OEM_FLAG,
+	BillToCustomerClassCode,
+	EndCustomerClassCode,
+	ShipToCustomerClassCode,
+	SoldToCustomerClassCode,
+	BillToCustomerPartnerClassCode,
+	EndCustomerPartnerClassCode,
+	ShipToCustomerPartnerClassCode,
+	SoldToCustomerPartnerClassCode,
+	BillToOracleRegistryID, 
+	EndOracleRegistryID,
+	ShipToOracleRegistryID,
+	SoldToOracleRegistryID,
+	BillToCustomerIndustry3,
+	EndCustomerIndustry3,
+	ShipToCustomerIndustry3,
+	SoldToCustomerIndustry3,
+	BillToCustomerSubVertical,
+	EndCustomerSubVertical,
+	ShipToCustomerSubVertical,
+	SoldToCustomerSubVertical,
+	BillToReportingSubParent1,
+	EndReportingSubParent1,
+	ShipToReportingSubParent1,
+	SoldToReportingSubParent1,
+	BillToDefinitiveIDNID,
+	EndDefinitiveIDNID,
+	ShipToDefinitiveIDNID,
+	SoldToDefinitiveIDNID,
+	BillToDefinitiveIDNIDParentID,
+	EndDefinitiveIDNIDParentID,
+	ShipToDefinitiveIDNIDParentID,
+	SoldToDefinitiveIDNIDParentID,
+	BillToNCESLEAID,
+	EndNCESLEAID,
+	ShipToNCESLEAID,
+	SoldToNCESLEAID,
+	SoldToCustomerAddress,
+	BillToCustomerCity,
+	ShipToCustomerCity,
+	SoldToCustomerCity,
+	BillToCustomerState,
+	ShipToCustomerState,
+	SoldToCustomerState,
+	BillToCustomerProvince,
+	EndCustomerProvince,
+	ShipToCustomerProvince,
+	SoldToCustomerProvince,
+	BillToCustomerCountry,
+	SoldToCustomerCountry,
+	ShipToCustomerPostalCode,
+	SoldToCustomerPostalCode,
+	BillToOraclePartySiteNumber,  
+	EndOraclePartySiteNumber,
+	ShipToOraclePartySiteNumber,
+	SoldToOraclePartySiteNumber,
+	BillToDefinitiveID,
+	EndDefinitiveID,
+	ShipToDefinitiveID,
+	SoldToDefinitiveID,
+	BillToNCESSCHID,
+	EndNCESSCHID,
+	ShipToNCESSCHID,
+	SoldToNCESSCHID,
+	BillToAccountType,
+	EndAccountType,
+	ShipToAccountType,
+	SoldToAccountType,
+	productcommissionclasscode,
+	'Orders' as Measure,
+	Calendar_Month,
+	Calendar_Year,
+	Local_Currency,
+	Sales_Office,
+	Unit_Price,
+	UNIT_PRICE_FXD_USD,
+	BillToServicesMajorAcc,
+	EndServicesMajorAcc,
+	ShipToServicesMajorAcc,
+	SoldToServicesMajorAcc,
+	BillToCustomerSubClass, 
+    EndCustomerSubClass,
+    ShipToCustomerSubClass,
+    SoldToCustomerSubClass, 
+	aop_customer_sub_class
+	
+	from(
+select distinct *,
+CASE
+		WHEN temp_motion2 = 'FIELD SALES'
+		AND (upper(lob) != 'DC POWER'
+		OR (nvl(lob,
+		'N') = 'N'))
+		AND (upper(billtocustomerpartnerclasscode) IN ('SOLUTIONS PARTNER', 'AUTHORIZED DISTRIBUTOR')
+		OR upper(recordsource) LIKE '%CONTEXT%'
+		OR upper(oem_flag) = 'DELL'
+		OR upper(level_6) LIKE '%SECURE%') THEN 'CHANNEL'
+		ELSE temp_motion2
+	END selling_motion
+	
+from(
+select distinct *,
+ CASE
+		    WHEN temp_motion = 'FIELD SALES'
+		    AND ((upper(endcustomerclasscode) = 'GLOBAL STRATEGIC ACCOUNT'
+		    OR upper(billtocustomerclasscode) = 'GLOBAL STRATEGIC ACCOUNT')
+		    OR (plant IN ('102', '103', '105', '106')
+		    AND upper(recordsource) IN ('ORACLEERPCLOUD'))
+		    OR upper(oem_flag) IN ('LENOVO', 'IBM', 'HPE')) THEN 'ACCOUNT'
+		    WHEN temp_motion = 'FIELD SALES'
+		    AND upper(recordsource) = 'ERS_HVM'
+		    AND upper(billtoaccounttype) != 'INTERNAL' THEN 'ERS/HVM'
+		    ELSE temp_motion
+	        END temp_motion2	
+			
+from(
+select distinct *,
+ CASE
+		    WHEN upper(billtoaccounttype) = 'INTERNAL'
+		    AND upper(billtocustomercountry) = 'UNITED STATES' THEN 'INTERCOMPANY USA'
+		    WHEN upper(billtoaccounttype) = 'INTERNAL'
+		    AND upper(billtocustomercountry) = 'CANADA' THEN 'INTERCOMPANY CANADA'
+		    WHEN upper(billtoaccounttype) = 'INTERNAL'
+		    AND (upper(billtocustomercountry) NOT IN ('UNITED STATES', 'CANADA')
+		    OR (nvl(billtocustomercountry,'N') = 'N')) THEN 'INTERCOMPANY OTHER'
+		    ELSE 'FIELD SALES'
+	        END temp_motion
+			
+		FROM
+           (
+       SELECT
 		'' account_type_aop,
 		'' AccountAM,
 		'' AccountCSM,
@@ -2058,7 +2343,6 @@ LEFT OUTER JOIN
 		'' SalesRepName,
 		'' SalesRepType,
 		'' SAPOEMTag,
-		'' Selling_Motion,
 		cast('' as timestamp) OrderDeliveryPromisedDate,
 		'' Segment,
 		'' SFR_Category,
@@ -2133,12 +2417,12 @@ LEFT OUTER JOIN
 		'' sales_order_line_type,
 		'' Order_type,
 		'' Class_code,
-		'' OEM_FLAG,
-		'' BillToCustomerClassCode,
-		'' EndCustomerClassCode,
+		pro.oem_flag OEM_FLAG,
+		dch_v.customer_class_code_txt BillToCustomerClassCode,
+		dch_v.customer_class_code_txt EndCustomerClassCode,
 		'' ShipToCustomerClassCode,
 		'' SoldToCustomerClassCode,
-		'' BillToCustomerPartnerClassCode,
+		dch_v.partner_class_code_txt BillToCustomerPartnerClassCode,
 		'' EndCustomerPartnerClassCode,
 		'' ShipToCustomerPartnerClassCode,
 		'' SoldToCustomerPartnerClassCode,
@@ -2197,7 +2481,14 @@ LEFT OUTER JOIN
 		'' EndNCESSCHID,
 		'' ShipToNCESSCHID,
 		'' SoldToNCESSCHID,
-		'' BillToAccountType,
+		/* case when dch_v.buying_customer_flg ='Y' then dch_v.customer_type_txt 
+         else ''
+        END BillToAccountType, */
+		CASE WHEN (dch_v.buying_customer_flg IS NULL AND dch_v.customer_type_txt = 'EXTERNAL')
+		THEN dch_v.customer_type_txt
+		WHEN dch_v.buying_customer_flg ='Y' THEN dch_v.customer_type_txt
+		ELSE ''
+		END BillToAccountType,
 		'' EndAccountType,
 		'' ShipToAccountType,
 		'' SoldToAccountType,
@@ -2224,7 +2515,8 @@ LEFT OUTER JOIN
 		'' BillToCustomerSubClass, --so-728 new attributes addition starts
 		'' EndCustomerSubClass,
 		'' ShipToCustomerSubClass,
-		'' SoldToCustomerSubClass --so-728 new attributes addition ends
+		'' SoldToCustomerSubClass, --so-728 new attributes addition ends
+		'' aop_customer_sub_class
 	
 
 from (SELECT ID, ORDERNO, ord_date, DATE_TAKEN, EPLANT_ID, arcusto_id, ship_to_id, bill_to_id, CURRENCY_ID FROM @DB_LEVEL@_geist_silver.geist_orders
@@ -2283,6 +2575,9 @@ LEFT OUTER JOIN @DB_LEVEL@_edm_gold.d_product pro ON
 upper(trim(i.itemno))=pro.part_num
 LEFT OUTER JOIN @DB_LEVEL@_edm_gold.d_product_catalog catl ON
 pro.row_wid = catl.product_wid 
+LEFT JOIN @DB_LEVEL@_mdm_hub_gold.d_customer_header_v dch_v on
+dch_v.customer_number = c.custno
+and dch_v.src_system_name = 'POS-CONTEXT-GEIST'
 LEFT OUTER JOIN (
 	SELECT * FROM
 		(SELECT * FROM
@@ -2305,12 +2600,14 @@ and extract (year from o.ord_date) >2017
 AND ((trim(C.CUSTNO) NOT IN ('GA777','GT50') AND O.EPLANT_ID=3)
     OR (trim(C.CUSTNO) NOT IN ('GE-GEI03') AND O.EPLANT_ID=6)
     OR O.EPLANT_ID IN (5))
-	AND e.company IN ('Vertiv Corporation', 'Vertiv Canada', 'Vertiv Canada ULC');	
+	AND e.company IN ('Vertiv Corporation', 'Vertiv Canada', 'Vertiv Canada ULC')
+)Gt )s1 )s2 )s3;	
 compute stats @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na;
                         
                             
                             
-4. populate_comm_split_and_order_bkp_tbl
+							
+4.populate_comm_split_and_order_bkp_tbl
 
 -----Populate cpq_commission_split_tbl from cpq_commission_split_vw to improve performance.
 
@@ -2492,7 +2789,7 @@ FROM
         AND CAST(row_number AS DECIMAL(25,0)) > 0) cpq_comm_split ON cpq_header_lvo.bs_id = cpq_comm_split.split_bs_id
   -- AND upper(cpq_header_lvo.LVO_flag) = 'TRUE'
    AND nvl(cpq_comm_split.split_office_number, '') != 'Default/Final'
-   AND CAST(Split_Percent AS DOUBLE) >= 0   --Vishal, July 25 2022.
+   AND CAST(Split_Percent AS DOUBLE) >= 0   -- Commenting out as we need data for 0 split % to flow in --Vishal, July 25 2022.
    ) cpq_split
 LEFT OUTER JOIN
   (SELECT DISTINCT Sales_office_no,
@@ -2522,7 +2819,7 @@ insert overwrite @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_bkp
 select * from @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na WHERE sku not in ('CSHMVECTD','CSHMVEDTC','REBATE-ACP','REBATE-AVCT','VATWHND','BACKCHARGE-MRKTG');
 
 
-5. new_commissions_split_logic
+5.new_commissions_split_logic
 
 
 
@@ -2589,7 +2886,7 @@ WHERE order_number IS NOT NULL
 TRUNCATE TABLE @DB_LEVEL@_edm_other_src_silver.Commissions_territory_tmp1_tbl; 
 
 INSERT INTO @DB_LEVEL@_edm_other_src_silver.Commissions_territory_tmp1_tbl
-SELECT cast(oe.order_number AS string) AS Alice_order_Number,
+SELECT DISTINCT cast(oe.order_number AS string) AS Alice_order_Number,
        orcl_erp_ordernumber_t AS ORERP_Order_number,
        csp.*,
        zip_code,
@@ -2600,7 +2897,9 @@ SELECT cast(oe.order_number AS string) AS Alice_order_Number,
 FROM (SELECT * FROM @DB_LEVEL@_edm_other_src_silver.cpq_commission_split_tbl WHERE commission_allocation='Territory' ) csp
 LEFT OUTER JOIN @DB_LEVEL@_ora_alice_silver.alice_oe_order_headers_all oe ON oe.orig_sys_document_ref = csp.quotenumber
 LEFT OUTER JOIN @DB_LEVEL@_cld_cpq_silver.cpq_quote_headers qh ON csp.quotenumber=qh.transactionid_t
+LEFT OUTER JOIN @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_bkp Core on Core.salesordernumber = cast(oe.order_number AS string)
 LEFT OUTER JOIN @DB_LEVEL@_edm_other_src_silver.zip_counties_rep_region sclass ON sclass.office_number = csp.sales_office_number
+and sclass.zip_code = core.endcustomerpostalcode
 LEFT JOIN
   (SELECT DISTINCT emailaddress,
                    fullname,
@@ -2673,7 +2972,7 @@ FROM
                    commission_allocation,
                    emailaddress,
                    fullname,
-                   officenumber,
+                   nvl(officenumber,Terr.sales_office_number) as officenumber,
                    salesrepnumber
    FROM @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_bkp Core
    LEFT OUTER JOIN
@@ -2710,7 +3009,7 @@ SELECT DISTINCT recordsource,
                 commission_allocation,
                 emailaddress,
                 fullname,
-                officenumber,
+                nvl(officenumber,Terr.sales_office_number) as officenumber,
                 salesrepnumber
    FROM @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_bkp Core
    JOIN
@@ -2768,7 +3067,7 @@ SELECT DISTINCT recordsource,
                 commission_allocation,
                 emailaddress,
                 fullname,
-                officenumber,
+                nvl(officenumber,Terr.sales_office_number) as officenumber,
                 salesrepnumber
    FROM @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_bkp Core
    JOIN
@@ -2804,7 +3103,7 @@ UNION SELECT DISTINCT recordsource,
                       commission_allocation,
                       emailaddress,
                       fullname,
-                      officenumber,
+                     nvl(officenumber,Terr.sales_office_number) as officenumber,
                       salesrepnumber
    FROM @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_bkp Core
    JOIN
@@ -2933,8 +3232,12 @@ SELECT  a.account_type_aop ,
 		END AS quantityordered,
 		a.quoteid ,
 		a.recordsource ,
-		NVL(b.sales_office_name,a.salesofficename) salesofficename ,  --VR 05202022 SO-672 
-		NVL(b.officenumber,a.salesofficenumber) salesofficenumber ,   --VR 05202022 SO-672
+		--NVL(b.sales_office_name,a.salesofficename) salesofficename ,  --VR 05202022 SO-672 
+		case when a.recordsource ='LES' then NVL(b.sales_office_name,a.salesofficename)
+        else b.sales_office_name end salesofficename,
+		--NVL(b.officenumber,a.salesofficenumber) salesofficenumber ,   --VR 05202022 SO-672
+		case when a.recordsource ='LES' then NVL(b.officenumber,a.salesofficenumber)
+        else b.officenumber end salesofficenumber,
 		a.salesofficeprincipalemail ,
 		b.officenumber salesofficereferencenumber ,
 		a.salesordernumber ,
@@ -3095,7 +3398,8 @@ SELECT  a.account_type_aop ,
 		a.billtocustomersubclass, --so-728 new attributes addition starts
 		a.endcustomersubclass,
 		a.shiptocustomersubclass,
-		a.soldtocustomersubclass  --so-728 new attributes addition ends
+		a.soldtocustomersubclass,  --so-728 new attributes addition ends
+		a.aop_customer_sub_class
 FROM @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_bkp a
 LEFT JOIN @DB_LEVEL@_edm_other_src_silver.Orders_Commissions_stage_tbl b 
 on a.salesordernumber = b.salesordernumber
@@ -3104,1637 +3408,7 @@ and a.lob = b.lob
 and a.recordsource = b.recordsource
 
 
-6.populate_alice_commn_temp_tbl
-
----Splitting the Alice commissions data and storing it in the table:- orders_exploration_alice_commn_temp_na
-
-insert overwrite @DB_LEVEL@_na_cld_osc_gold.orders_exploration_alice_commn_temp_na
-select distinct * from 
-(
-WITH SPLIT_NULLS AS 
-(
-select
-	distinct ordr.account_type_aop,
-	ordr.accountam,
-	ordr.accountcsm,
-	ordr.accountlead,
-	ordr.accountpresence,
-	ordr.accountservicesales,
-	ordr.accountsubtype,
-	ordr.accounttype,
-	ordr.aop_account_name,
-	ordr.aop_category,
-	ordr.billtoaccountrole,
-	ordr.billtocustomer,
-	ordr.billtocustomeraddress,
-	ordr.billtocustomercustomertype1,
-	ordr.billtocustomerenterpriseindustry,
-	ordr.billtocustomergsc,
-	ordr.billtocustomerindustry1,
-	ordr.billtocustomername,
-	ordr.billtocustomername2,
-	ordr.billtocustomernumber,
-	ordr.billtocustomerparentaccount,
-	ordr.billtocustomerpostalcode,
-	ordr.billtocustomerstandardizedname,
-	ordr.billtocustomervertical,
-	ordr.bsid,
-	ordr.channelflag,
-	ordr.coe,
-	ordr.coe_new,
-	ordr.contracttype,
-	ordr.customerpurchaseordernumber,
-	ordr.customerrequestdate,
-	ordr.data_last_refreshed,
-	ordr.endcustomer,
-	ordr.endcustomeraccountrole,
-	ordr.endcustomeraddress,
-	ordr.endcustomercity,
-	ordr.endcustomercountry,
-	ordr.endcustomercustomertype1,
-	ordr.endcustomerenterpriseindustry,
-	ordr.endcustomergsc,
-	ordr.endcustomerindustry1,
-	ordr.endcustomername,
-	ordr.endcustomernumber,
-	ordr.endcustomerparentaccount,
-	ordr.endcustomerpostalcode,
-	ordr.endcustomerstandardizedexists,
-	ordr.endcustomerstandardizedname,
-	ordr.endcustomerstate,
-	ordr.endcustomerstate2,
-	ordr.endcustomervertical,
-	ordr.exchangerateused,
-	ordr.extendedlistprice,
-	ordr.gbu,
-	ordr.growth_target,
-	cast(comm.split_percent as string) alicecommissionoverridepercent,
-	ordr.level_6,
-	ordr.listprice,
-	/*CASE 
-		WHEN ordr.lob IN ('AC POWER','ENERGY STORAGE') then 'AC_POWER'
-		WHEN ordr.lob IN ('RACKS','EDGE THERMAL','IT SYSTEMS','GLOBAL EDGE SYSTEMS','1 PHASE UPS','RACK PDU') then 'CHANNEL'
-		WHEN ordr.lob = 'DC POWER' then 'DC_POWER'
-		WHEN ordr.lob = 'DIGITAL ECOSYSTEM' then 'MONITORING'
-		WHEN ordr.lob IN ('TARRIF SURCHARGE','GENERAL SURCHARGE','NOT APPLICABLE') then 'NO_COMM'		
-		WHEN ordr.lob IN ('SERVICES','PARTS','DC POWER SERVICES','VERTIV SERVICES','PROJECT SERVICES','SERVICE AND SOFTWARE SOLUTIONS','SOFTWARE & SOLUTIONS COE','SOFTWARE SOLUTIONS','REGIONAL SERVICES' ) then 'SERVICES'
-		WHEN ordr.lob IN ('IMS - ENG & 3RD PARTY','IMS/CUSTOM') then 'SOLUTIONS'
-		WHEN ordr.lob = 'THERMAL' then 'THERMAL'
-		WHEN ordr.lob IN ('GLOBAL SOLUTIONS','DEFAULT','COMPONENT','EXCLUDE','CUSTOM SKU','QSKU','REGIONAL BUSINESSES','SERVICES & SOFTWARE SOLUTIONS') then NULL		
-		--WHEN ordr.lob = 'DEFAULT' then 'ORDER_DEFAULT'		
-		ELSE REPLACE(ordr.lob,' ','_')	
-	END lob ,*/
-	ordr.lob,
-	--replace(ordr.lob,' ','_') lob,
-	ordr.netsalesrevenue,
-	ordr.office_group,
-	ordr.office_website,
-	ordr.ordercoordinator,
-	ordr.ordercreatedate,
-	ordr.orderlastupdatedate,
-	ordr.orderexlinenumber,
-	ordr.partnerwebfolderid,
-	ordr.partnerwebquotenumber,
-	ordr.plant,
-	ordr.plantdescription,
-	ordr.product_category,
-	ordr.product_category_new,
-	ordr.product_family,
-	ordr.product_family_new,
-	ordr.proshipmentnumber,
-	ordr.quantityordered,
-	ordr.quoteid,
-	ordr.recordsource,
-	ordr.salesofficename,
-	ordr.salesofficenumber,
-	ordr.salesofficeprincipalemail,
-	ordr.salesofficereferencenumber,
-	ordr.salesordernumber,
-	ordr.salesregionname,
-	ordr.salesregionnumber,
-	--ordr.salesrepemail,
-	comm.participant_email as salesrepemail ,
-	--ordr.salesrepid,
-	comm.salesrepnumber as salesrepid,
-	--ordr.salesrepname,
-	comm.sales_rep_name as salesrepname ,
-	ordr.salesreptype,
-	ordr.sapoemtag,
-	ordr.selling_motion,
-	ordr.orderdeliverypromiseddate,
-	ordr.segment,
-	ordr.sfr_category,
-	ordr.shipdate,
-	ordr.shipmentcarriername,
-	ordr.shippedquantity,
-	ordr.shiptocustomeraddress,
-	ordr.shiptocustomercountry,
-	ordr.shiptocustomercustomertype1,
-	ordr.shiptocustomerenterpriseindustry,
-	ordr.shiptocustomergsc,
-	ordr.shiptocustomerindustry1,
-	ordr.shiptocustomername,
-	ordr.shiptocustomernumber,
-	ordr.shiptocustomerparentaccount,
-	ordr.shiptocustomerstandardizedname,
-	ordr.shiptocustomervertical,
-	ordr.sizecategory,
-	ordr.sku,
-	ordr.skudescription,
-	ordr.smsbatteriesonlyflag,
-	ordr.smsbatteryrbsm,
-	ordr.smscontractenddate,
-	ordr.smscontractexpiredate,
-	ordr.smscontractpms,
-	ordr.smscontractsequence,
-	ordr.smscontractstartdate,
-	ordr.smscontractstatus,
-	ordr.smscustomertype,
-	ordr.smsequipmentsegment,
-	ordr.smsrevcat,
-	ordr.smssiteid,
-	ordr.smsstackedwhenbooked,
-	ordr.smstagnumber,
-	ordr.smsticketnumber,
-	ordr.smstickettype,
-	ordr.soldtocustomercustomertype1,
-	ordr.soldtocustomerenterpriseindustry,
-	ordr.soldtocustomergsc,
-	ordr.soldtocustomerindustry1,
-	ordr.soldtocustomername,
-	ordr.soldtocustomerparentaccount,
-	ordr.soldtocustomerstandardizedname,
-	ordr.soldtocustomervertical,
-	ordr.speed_dial,
-	ordr.sales_area,
-	ordr.w_insert_by,
-	ordr.w_insert_dtm,
-	ordr.src_system_name,
-	ordr.resellernumber,
-	ordr.resellerbranchnumber,
-	ordr.resellerbranchname,
-	ordr.office_type,
-	ordr.uom,
-	ordr.sales_order_line_type,
-	ordr.Order_type
-from
-(select *
-from @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_bkp where recordsource='ALICE' ) ordr
-LEFT OUTER JOIN 
-(select
-	oe.order_number,
-	ca.orcl_erp_ordernumber_t,
-	ca.transactionid_t quoteid ,
-	ca.bs_id
-from
-	@DB_LEVEL@_cld_cpq_silver.cpq_quote_headers ca
-join
-@DB_LEVEL@_ora_alice_silver.alice_oe_order_headers_all oe on
-	oe.orig_sys_document_ref = ca.transactionid_t) cqh
-on ordr.salesordernumber=cast(cqh.order_number as STRING)
-LEFT OUTER JOIN
-(
-select
-	distinct quotenumber,sales_office_number,
-	sales_office_name ,split_percent,commission_allocation ,lob_group,internal_office_principal_email,
-	sales_office_region,repfix.emailaddress as participant_email ,sales_rep_name,salesrepnumber
-from
-	@DB_LEVEL@_edm_other_src_silver.cpq_commission_split_tbl cst
-	---- New Code to Fix Sales Rep ID and Rep Emailso we do not have to fix table
-	LEFT JOIN (select distinct emailaddress,fullname,officenumber,salesrepnumber,region from @DB_LEVEL@_cld_cpq_silver.cpq_dt_salesrepdetails ) REPFIX 
-	on upper(CST.sales_rep_name) =upper(REPFIX.fullname) and cst.sales_office_number=repfix.officenumber-- and CST.sales_office_region=repfix.region
-)comm on 
-(
-(cqh.quoteid=comm.quotenumber 
-and 
-CASE 
-	WHEN ordr.lob IN ('AC POWER','ENERGY STORAGE') then 'AC_POWER'
-	WHEN ordr.lob IN ('RACKS','EDGE THERMAL','IT SYSTEMS','GLOBAL EDGE SYSTEMS','1 PHASE UPS','RACK PDU') then 'CHANNEL'
-	WHEN ordr.lob = 'DC POWER' then 'DC_POWER'
-	WHEN ordr.lob = 'DIGITAL ECOSYSTEM' then 'MONITORING'
-	WHEN ordr.lob IN ('TARRIF SURCHARGE','GENERAL SURCHARGE','NOT APPLICABLE') then 'NO_COMM'		
-	WHEN ordr.lob IN ('SERVICES','PARTS','DC POWER SERVICES','VERTIV SERVICES','PROJECT SERVICES','SERVICE AND SOFTWARE SOLUTIONS','SOFTWARE & SOLUTIONS COE','SOFTWARE SOLUTIONS','REGIONAL SERVICES' ) then 'SERVICES'
-	WHEN ordr.lob IN ('IMS - ENG & 3RD PARTY','IMS/CUSTOM') then 'SOLUTIONS'
-	WHEN ordr.lob = 'THERMAL' then 'THERMAL'
-	WHEN ordr.lob IN ('GLOBAL SOLUTIONS','DEFAULT','COMPONENT','EXCLUDE','CUSTOM SKU','QSKU','REGIONAL BUSINESSES','SERVICES & SOFTWARE SOLUTIONS') then NULL
-	--WHEN ordr.lob = 'DEFAULT' then 'ORDER_DEFAULT'		
-	ELSE REPLACE(ordr.lob,' ','_')	
-END = comm.lob_group
-and ordr.salesofficenumber=comm.sales_office_number
-) OR 
-(cqh.quoteid=comm.quotenumber
-and ordr.salesofficenumber=comm.sales_office_number
-and comm.lob_group is null and cast(comm.split_percent as string) ='100'
-)
-)
-)
--------------
-select c.* from 
-(SELECT *
-FROM SPLIT_NULLS
-where alicecommissionoverridepercent is null
-) c
-where 0=
-(
-select count(*) from 
-(select distinct b.salesordernumber,b.orderexlinenumber,comm.sales_office_number
---b.*,comm.sales_office_number,comm.split_percent
-from 
-(select a.salesordernumber salesordernumber1,
-	   cqh.quoteid as quoteid_new,
-		CASE 
-			WHEN a.lob IN ('AC POWER','ENERGY STORAGE') then 'AC_POWER'
-			WHEN a.lob IN ('RACKS','EDGE THERMAL','IT SYSTEMS','GLOBAL EDGE SYSTEMS','1 PHASE UPS','RACK PDU') then 'CHANNEL'
-			WHEN a.lob = 'DC POWER' then 'DC_POWER'
-			WHEN a.lob = 'DIGITAL ECOSYSTEM' then 'MONITORING'
-			WHEN a.lob IN ('TARRIF SURCHARGE','GENERAL SURCHARGE','NOT APPLICABLE') then 'NO_COMM'		
-			WHEN a.lob IN ('SERVICES','PARTS','DC POWER SERVICES','VERTIV SERVICES','PROJECT SERVICES','SERVICE AND SOFTWARE SOLUTIONS','SOFTWARE & SOLUTIONS COE','SOFTWARE SOLUTIONS','REGIONAL SERVICES' ) then 'SERVICES'
-			WHEN a.lob IN ('IMS - ENG & 3RD PARTY','IMS/CUSTOM') then 'SOLUTIONS'
-			WHEN a.lob = 'THERMAL' then 'THERMAL'
-			WHEN a.lob IN ('GLOBAL SOLUTIONS','DEFAULT','COMPONENT','EXCLUDE','CUSTOM SKU','QSKU','REGIONAL BUSINESSES','SERVICES & SOFTWARE SOLUTIONS') then NULL
-			--WHEN lob = 'DEFAULT' then 'ORDER_DEFAULT'		
-			ELSE REPLACE(a.lob,' ','_')	
-		END lob_new ,
-		a.lob lob_orig,
-		a.* from 
-(SELECT *
-FROM SPLIT_NULLS
-) a 
-left JOIN 
-(select distinct 
-	oe.order_number,
-	ca.transactionid_t quoteid
-from
-	@DB_LEVEL@_cld_cpq_silver.cpq_quote_headers ca
-join
-@DB_LEVEL@_ora_alice_silver.alice_oe_order_headers_all oe on
-oe.orig_sys_document_ref = ca.transactionid_t
-) cqh
-on a.salesordernumber=cast(cqh.order_number as STRING)
-)b LEFT OUTER JOIN
-(
-select
-	distinct quotenumber,sales_office_number,
-	sales_office_name ,split_percent,commission_allocation ,lob_group,internal_office_principal_email,
-	sales_office_region,repfix.emailaddress as participant_email ,sales_rep_name,salesrepnumber
-from
-	@DB_LEVEL@_edm_other_src_silver.cpq_commission_split_tbl cst
-	---- New Code to Fix Sales Rep ID and Rep Emailso we do not have to fix table
-	LEFT JOIN (select distinct emailaddress,fullname,officenumber,salesrepnumber,region from @DB_LEVEL@_cld_cpq_silver.cpq_dt_salesrepdetails ) REPFIX 
-	on upper(CST.sales_rep_name) =upper(REPFIX.fullname) and cst.sales_office_number=repfix.officenumber-- and CST.sales_office_region=repfix.region
-)comm on 
-b.quoteid_new=comm.quotenumber and b.lob_new= comm.lob_group
-)e where c.salesordernumber = e.salesordernumber and c.orderexlinenumber=e.orderexlinenumber
-)
-
-UNION
-(SELECT * FROM SPLIT_NULLS where alicecommissionoverridepercent is not null )
-UNION 
-/* Bringing in the split commission data   */
-select distinct 
-ordr_final.account_type_aop,
-ordr_final.accountam,
-ordr_final.accountcsm,
-ordr_final.accountlead,
-ordr_final.accountpresence,
-ordr_final.accountservicesales,
-ordr_final.accountsubtype,
-ordr_final.accounttype,
-ordr_final.aop_account_name,
-ordr_final.aop_category,
-ordr_final.billtoaccountrole,
-ordr_final.billtocustomer,
-ordr_final.billtocustomeraddress,
-ordr_final.billtocustomercustomertype1,
-ordr_final.billtocustomerenterpriseindustry,
-ordr_final.billtocustomergsc,
-ordr_final.billtocustomerindustry1,
-ordr_final.billtocustomername,
-ordr_final.billtocustomername2,
-ordr_final.billtocustomernumber,
-ordr_final.billtocustomerparentaccount,
-ordr_final.billtocustomerpostalcode,
-ordr_final.billtocustomerstandardizedname,
-ordr_final.billtocustomervertical,
-ordr_final.bsid,
-ordr_final.channelflag,
-ordr_final.coe,
-ordr_final.coe_new,
-ordr_final.contracttype,
-ordr_final.customerpurchaseordernumber,
-ordr_final.customerrequestdate,
-ordr_final.data_last_refreshed,
-ordr_final.endcustomer,
-ordr_final.endcustomeraccountrole,
-ordr_final.endcustomeraddress,
-ordr_final.endcustomercity,
-ordr_final.endcustomercountry,
-ordr_final.endcustomercustomertype1,
-ordr_final.endcustomerenterpriseindustry,
-ordr_final.endcustomergsc,
-ordr_final.endcustomerindustry1,
-ordr_final.endcustomername,
-ordr_final.endcustomernumber,
-ordr_final.endcustomerparentaccount,
-ordr_final.endcustomerpostalcode,
-ordr_final.endcustomerstandardizedexists,
-ordr_final.endcustomerstandardizedname,
-ordr_final.endcustomerstate,
-ordr_final.endcustomerstate2,
-ordr_final.endcustomervertical,
-ordr_final.exchangerateused,
-ordr_final.extendedlistprice,
-ordr_final.gbu,
-ordr_final.growth_target,
-cast(comm.split_percent as string) alicecommissionoverridepercent,
-ordr_final.level_6,
-ordr_final.listprice,
-ordr_final.gph_lob lob,
-ordr_final.netsalesrevenue,
-ordr_final.office_group,
-ordr_final.office_website,
-ordr_final.ordercoordinator,
-ordr_final.ordercreatedate,
-ordr_final.orderlastupdatedate,
-ordr_final.orderexlinenumber,
-ordr_final.partnerwebfolderid,
-ordr_final.partnerwebquotenumber,
-ordr_final.plant,
-ordr_final.plantdescription,
-ordr_final.product_category,
-ordr_final.product_category_new,
-ordr_final.product_family,
-ordr_final.product_family_new,
-ordr_final.proshipmentnumber,
-ordr_final.quantityordered,
-ordr_final.quoteid,
-ordr_final.recordsource,
-comm.sales_office_name salesofficename,
-comm.sales_office_number salesofficenumber,
-comm.internal_office_principal_email as salesofficeprincipalemail,
---ordr_final.salesofficeprincipalemail,
-ordr_final.salesofficereferencenumber,
-ordr_final.salesordernumber,
-comm.sales_office_region as salesregionname,
---ordr_final.salesregionname,
-ordr_final.salesregionnumber,
-comm.participant_email as salesrepemail,
---ordr_final.salesrepemail,
---ordr_final.salesrepid,
-comm.salesrepnumber as salesrepid,
-comm.sales_rep_name as salesrepname,
---ordr_final.salesrepname,
-ordr_final.salesreptype,
-ordr_final.sapoemtag,
-ordr_final.selling_motion,
-ordr_final.orderdeliverypromiseddate,
-ordr_final.segment,
-ordr_final.sfr_category,
-ordr_final.shipdate,
-ordr_final.shipmentcarriername,
-ordr_final.shippedquantity,
-ordr_final.shiptocustomeraddress,
-ordr_final.shiptocustomercountry,
-ordr_final.shiptocustomercustomertype1,
-ordr_final.shiptocustomerenterpriseindustry,
-ordr_final.shiptocustomergsc,
-ordr_final.shiptocustomerindustry1,
-ordr_final.shiptocustomername,
-ordr_final.shiptocustomernumber,
-ordr_final.shiptocustomerparentaccount,
-ordr_final.shiptocustomerstandardizedname,
-ordr_final.shiptocustomervertical,
-ordr_final.sizecategory,
-ordr_final.sku,
-ordr_final.skudescription,
-ordr_final.smsbatteriesonlyflag,
-ordr_final.smsbatteryrbsm,
-ordr_final.smscontractenddate,
-ordr_final.smscontractexpiredate,
-ordr_final.smscontractpms,
-ordr_final.smscontractsequence,
-ordr_final.smscontractstartdate,
-ordr_final.smscontractstatus,
-ordr_final.smscustomertype,
-ordr_final.smsequipmentsegment,
-ordr_final.smsrevcat,
-ordr_final.smssiteid,
-ordr_final.smsstackedwhenbooked,
-ordr_final.smstagnumber,
-ordr_final.smsticketnumber,
-ordr_final.smstickettype,
-ordr_final.soldtocustomercustomertype1,
-ordr_final.soldtocustomerenterpriseindustry,
-ordr_final.soldtocustomergsc,
-ordr_final.soldtocustomerindustry1,
-ordr_final.soldtocustomername,
-ordr_final.soldtocustomerparentaccount,
-ordr_final.soldtocustomerstandardizedname,
-ordr_final.soldtocustomervertical,
-ordr_final.speed_dial,
-ordr_final.sales_area,
-ordr_final.w_insert_by,
-ordr_final.w_insert_dtm,
-ordr_final.src_system_name,
-ordr_final.resellernumber,
-ordr_final.resellerbranchnumber,
-ordr_final.resellerbranchname,
-ordr_final.office_type,
-ordr_final.uom,
-ordr_final.sales_order_line_type,
-ordr_final.Order_type
- from 
-(select
-	distinct ordr.*,CPQ_quoteid
-	--cqh.quoteid
-from
-(select account_type_aop ,
-accountam ,
-accountcsm ,
-accountlead ,
-accountpresence ,
-accountservicesales ,
-accountsubtype ,
-accounttype ,
-aop_account_name ,
-aop_category ,
-billtoaccountrole ,
-billtocustomer ,
-billtocustomeraddress ,
-billtocustomercustomertype1 ,
-billtocustomerenterpriseindustry ,
-billtocustomergsc ,
-billtocustomerindustry1 ,
-billtocustomername ,
-billtocustomername2 ,
-billtocustomernumber ,
-billtocustomerparentaccount ,
-billtocustomerpostalcode ,
-billtocustomerstandardizedname ,
-billtocustomervertical ,
-bsid ,
-channelflag ,
-coe ,
-coe_new ,
-contracttype ,
-customerpurchaseordernumber ,
-customerrequestdate ,
-data_last_refreshed ,
-endcustomer ,
-endcustomeraccountrole ,
-endcustomeraddress ,
-endcustomercity ,
-endcustomercountry ,
-endcustomercustomertype1 ,
-endcustomerenterpriseindustry ,
-endcustomergsc ,
-endcustomerindustry1 ,
-endcustomername ,
-endcustomernumber ,
-endcustomerparentaccount ,
-endcustomerpostalcode ,
-endcustomerstandardizedexists ,
-endcustomerstandardizedname ,
-endcustomerstate ,
-endcustomerstate2 ,
-endcustomervertical ,
-exchangerateused ,
-extendedlistprice ,
-gbu ,
-growth_target ,
-alicecommissionoverridepercent ,
-level_6 ,
-listprice ,
-	CASE 
-		WHEN lob IN ('AC POWER','ENERGY STORAGE') then 'AC_POWER'
-		WHEN lob IN ('RACKS','EDGE THERMAL','IT SYSTEMS','GLOBAL EDGE SYSTEMS','1 PHASE UPS','RACK PDU') then 'CHANNEL'
-		WHEN lob = 'DC POWER' then 'DC_POWER'
-		WHEN lob = 'DIGITAL ECOSYSTEM' then 'MONITORING'
-		WHEN lob IN ('TARRIF SURCHARGE','GENERAL SURCHARGE','NOT APPLICABLE') then 'NO_COMM'		
-		WHEN lob IN ('SERVICES','PARTS','DC POWER SERVICES','VERTIV SERVICES','PROJECT SERVICES','SERVICE AND SOFTWARE SOLUTIONS','SOFTWARE & SOLUTIONS COE','SOFTWARE SOLUTIONS','REGIONAL SERVICES' ) then 'SERVICES'
-		WHEN lob IN ('IMS - ENG & 3RD PARTY','IMS/CUSTOM') then 'SOLUTIONS'
-		WHEN lob = 'THERMAL' then 'THERMAL'
-		WHEN lob IN ('GLOBAL SOLUTIONS','DEFAULT','COMPONENT','EXCLUDE','CUSTOM SKU','QSKU','REGIONAL BUSINESSES','SERVICES & SOFTWARE SOLUTIONS') then NULL
-		--WHEN lob = 'DEFAULT' then 'ORDER_DEFAULT'		
-		ELSE REPLACE(lob,' ','_')	
-	END lob ,
-lob as gph_lob,	
-netsalesrevenue ,
-office_group ,
-office_website ,
-ordercoordinator ,
-ordercreatedate ,
-orderlastupdatedate ,
-orderexlinenumber ,
-partnerwebfolderid ,
-partnerwebquotenumber ,
-plant ,
-plantdescription ,
-product_category ,
-product_category_new ,
-product_family ,
-product_family_new ,
-proshipmentnumber ,
-quantityordered ,
-quoteid ,
-recordsource ,
-salesofficename ,
-salesofficenumber ,
-salesofficeprincipalemail ,
-salesofficereferencenumber ,
-salesordernumber ,
-salesregionname ,
-salesregionnumber ,
-salesrepemail ,
-salesrepid ,
-salesrepname ,
-salesreptype ,
-sapoemtag ,
-selling_motion ,
-orderdeliverypromiseddate ,
-segment ,
-sfr_category ,
-shipdate ,
-shipmentcarriername ,
-shippedquantity ,
-shiptocustomeraddress ,
-shiptocustomercountry ,
-shiptocustomercustomertype1 ,
-shiptocustomerenterpriseindustry ,
-shiptocustomergsc ,
-shiptocustomerindustry1 ,
-shiptocustomername ,
-shiptocustomernumber ,
-shiptocustomerparentaccount ,
-shiptocustomerstandardizedname ,
-shiptocustomervertical ,
-sizecategory ,
-sku ,
-skudescription ,
-smsbatteriesonlyflag ,
-smsbatteryrbsm ,
-smscontractenddate ,
-smscontractexpiredate ,
-smscontractpms ,
-smscontractsequence ,
-smscontractstartdate ,
-smscontractstatus ,
-smscustomertype ,
-smsequipmentsegment ,
-smsrevcat ,
-smssiteid ,
-smsstackedwhenbooked ,
-smstagnumber ,
-smsticketnumber ,
-smstickettype ,
-soldtocustomercustomertype1 ,
-soldtocustomerenterpriseindustry ,
-soldtocustomergsc ,
-soldtocustomerindustry1 ,
-soldtocustomername ,
-soldtocustomerparentaccount ,
-soldtocustomerstandardizedname ,
-soldtocustomervertical ,
-speed_dial ,
-sales_area ,
-w_insert_by ,
-w_insert_dtm ,
-src_system_name ,
-resellernumber,
-resellerbranchnumber,
-resellerbranchname,
-office_type,
-uom,
-sales_order_line_type,
-Order_type
-from @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_bkp where recordsource='ALICE' ) ordr
-LEFT OUTER JOIN 
-(select
-	oe.order_number,
-	ca.orcl_erp_ordernumber_t,
-	ca.transactionid_t CPQ_quoteid,
-	ca.bs_id
-from
-	@DB_LEVEL@_cld_cpq_silver.cpq_quote_headers ca
-join
-@DB_LEVEL@_ora_alice_silver.alice_oe_order_headers_all oe on
-	oe.orig_sys_document_ref = ca.transactionid_t) cqh
-on ordr.salesordernumber=cast(cqh.order_number as STRING)) ordr_final
-LEFT OUTER JOIN 
-(
-select
-	distinct quotenumber,sales_office_number,
-	sales_office_name ,split_percent,commission_allocation ,lob_group,internal_office_principal_email,
-	sales_office_region,repfix.emailaddress as participant_email ,sales_rep_name,salesrepnumber
-from
-	@DB_LEVEL@_edm_other_src_silver.cpq_commission_split_tbl cst
-	---- New Code to Fix Sales Rep ID and Rep Emailso we do not have to fix table
-	LEFT JOIN (select distinct emailaddress,fullname,officenumber,salesrepnumber,region from @DB_LEVEL@_cld_cpq_silver.cpq_dt_salesrepdetails ) REPFIX 
-	on upper(CST.sales_rep_name) =upper(REPFIX.fullname) and cst.sales_office_number=repfix.officenumber-- and CST.sales_office_region=repfix.region
-)comm on 
-ordr_final.CPQ_quoteid=comm.quotenumber 
-and ordr_final.lob=comm.lob_group 
-/*New code added to remove dups comming from extra added fields.*/
-/* where not exists 
-(
-select * from 
-(
-select
-	distinct 	
-	cast(comm.split_percent as string) alicecommissionoverridepercent,
-	ordr.level_6,
-	ordr.listprice,
-	CASE 
-		WHEN ordr.lob IN ('AC POWER','ENERGY STORAGE') then 'AC_POWER'
-		WHEN ordr.lob IN ('RACKS','EDGE THERMAL','IT SYSTEMS','GLOBAL EDGE SYSTEMS','1 PHASE UPS','RACK PDU') then 'CHANNEL'
-		WHEN ordr.lob = 'DC POWER' then 'DC_POWER'
-		WHEN ordr.lob = 'DIGITAL ECOSYSTEM' then 'MONITORING'
-		WHEN ordr.lob IN ('TARRIF SURCHARGE','GENERAL SURCHARGE','NOT APPLICABLE') then 'NO_COMM'		
-		WHEN ordr.lob IN ('SERVICES','PARTS','DC POWER SERVICES','VERTIV SERVICES','PROJECT SERVICES','SERVICE AND SOFTWARE SOLUTIONS','SOFTWARE & SOLUTIONS COE','SOFTWARE SOLUTIONS','REGIONAL SERVICES' ) then 'SERVICES'
-		WHEN ordr.lob IN ('IMS - ENG & 3RD PARTY','IMS/CUSTOM') then 'SOLUTIONS'
-		WHEN ordr.lob = 'THERMAL' then 'THERMAL'
-		WHEN ordr.lob IN ('GLOBAL SOLUTIONS','DEFAULT','COMPONENT','EXCLUDE','CUSTOM SKU','QSKU','REGIONAL BUSINESSES','SERVICES & SOFTWARE SOLUTIONS') then NULL		
-		--WHEN ordr.lob = 'DEFAULT' then 'ORDER_DEFAULT'		
-		ELSE REPLACE(ordr.lob,' ','_')	
-	END lob ,
-	ordr.lob gph_lob,
-	--replace(ordr.lob,' ','_') lob,
-	ordr.orderexlinenumber,	
-	ordr.quantityordered,
-	ordr.quoteid,
-	ordr.recordsource,
-	ordr.salesofficename,
-	ordr.salesofficenumber,
-	ordr.salesofficeprincipalemail,
-	ordr.salesofficereferencenumber,
-	ordr.salesordernumber,
-	ordr.salesregionname,
-	ordr.salesregionnumber,
-	ordr.salesrepemail,
-	ordr.salesrepid,
-	ordr.salesrepname,	
-	ordr.sku,	
-	ordr.src_system_name,
-	ordr.resellernumber	
-from
-(select *
-from @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_bkp where recordsource='ALICE' ) ordr
-LEFT OUTER JOIN 
-(select 
-	orcl_erp_ordernumber_t,
-	transactionid_t quoteid ,
-	bs_id 
-from
-	@DB_LEVEL@_cld_cpq_silver.cpq_quote_headers) cqh
-on ordr.salesordernumber=cqh.orcl_erp_ordernumber_t
-LEFT OUTER JOIN
-(
-select
-	distinct quotenumber,sales_office_number,
-	sales_office_name ,split_percent,commission_allocation ,lob_group,internal_office_principal_email,
-	sales_office_region,participant_email ,sales_rep_name
-from
-	@DB_LEVEL@_edm_other_src_silver.cpq_commission_split_tbl
-)comm on 
-cqh.quoteid=comm.quotenumber 
---and replace(ordr.lob,' ','_')=comm.lob_group
-and ordr.salesofficenumber=comm.sales_office_number
-)j
-where j.salesordernumber=ordr_final.salesordernumber
-      and j.sku=ordr_final.sku
-	  and j.orderexlinenumber=ordr_final.orderexlinenumber
-	  and j.salesofficenumber=ordr_final.salesofficenumber
-	  and j.gph_lob = ordr_final.gph_lob ) */
-and nvl(ordr_final.salesofficenumber,'')<>comm.sales_office_number	  
-)q ;
-
-
-
-7. Insert_into_orders_exploration_final
-
-insert overwrite @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na
-select  
-account_type_aop ,
-accountam ,
-accountcsm ,
-accountlead ,
-accountpresence ,
-accountservicesales ,
-accountsubtype ,
-accounttype ,
-aop_account_name ,
-aop_category ,
-billtoaccountrole ,
-billtocustomer ,
-billtocustomeraddress ,
-billtocustomercustomertype1 ,
-billtocustomerenterpriseindustry ,
-billtocustomergsc ,
-billtocustomerindustry1 ,
-billtocustomername ,
-billtocustomername2 ,
-billtocustomernumber ,
-billtocustomerparentaccount ,
-billtocustomerpostalcode ,
-billtocustomerstandardizedname ,
-billtocustomervertical ,
-bsid ,
-channelflag ,
-coe ,
-coe_new ,
-contracttype ,
-customerpurchaseordernumber ,
-customerrequestdate ,
-data_last_refreshed ,
-endcustomer ,
-endcustomeraccountrole ,
-endcustomeraddress ,
-endcustomercity ,
-endcustomercountry ,
-endcustomercustomertype1 ,
-endcustomerenterpriseindustry ,
-endcustomergsc ,
-endcustomerindustry1 ,
-endcustomername ,
-endcustomernumber ,
-endcustomerparentaccount ,
-endcustomerpostalcode ,
-endcustomerstandardizedexists ,
-endcustomerstandardizedname ,
-endcustomerstate ,
-endcustomerstate2 ,
-endcustomervertical ,
-exchangerateused ,
-extendedlistprice,
-gbu ,
-growth_target ,
-alicecommissionoverridepercent ,
-level_6 ,
-listprice,
-lob ,
-netsalesrevenue,
-office_group ,
-office_website ,
-ordercoordinator ,
-ordercreatedate ,
-orderlastupdatedate ,
-orderexlinenumber ,
-partnerwebfolderid ,
-partnerwebquotenumber ,
-plant ,
-plantdescription ,
-product_category ,
-product_category_new ,
-product_family ,
-product_family_new ,
-proshipmentnumber ,
-quantityordered,
-quoteid ,
-recordsource ,
-salesofficename ,
-salesofficenumber ,
-salesofficeprincipalemail ,
-salesofficereferencenumber ,
-salesordernumber ,
-salesregionname ,
-salesregionnumber ,
-salesrepemail ,
-salesrepid ,
-salesrepname ,
-salesreptype ,
-sapoemtag ,
-selling_motion ,
-orderdeliverypromiseddate ,
-segment ,
-sfr_category ,
-shipdate ,
-shipmentcarriername ,
-shippedquantity,
-shiptocustomeraddress ,
-shiptocustomercountry ,
-shiptocustomercustomertype1 ,
-shiptocustomerenterpriseindustry ,
-shiptocustomergsc ,
-shiptocustomerindustry1 ,
-shiptocustomername ,
-shiptocustomernumber ,
-shiptocustomerparentaccount ,
-shiptocustomerstandardizedname ,
-shiptocustomervertical ,
-sizecategory ,
-sku ,
-skudescription ,
-smsbatteriesonlyflag ,
-smsbatteryrbsm ,
-smscontractenddate ,
-smscontractexpiredate ,
-smscontractpms ,
-smscontractsequence ,
-smscontractstartdate ,
-smscontractstatus ,
-smscustomertype ,
-smsequipmentsegment ,
-smsrevcat ,
-smssiteid ,
-smsstackedwhenbooked ,
-smstagnumber ,
-smsticketnumber ,
-smstickettype ,
-soldtocustomercustomertype1 ,
-soldtocustomerenterpriseindustry ,
-soldtocustomergsc ,
-soldtocustomerindustry1 ,
-soldtocustomername ,
-soldtocustomerparentaccount ,
-soldtocustomerstandardizedname ,
-soldtocustomervertical ,
-speed_dial ,
-sales_area ,
-w_insert_by ,
-w_insert_dtm ,
-src_system_name ,
-resellernumber,
-resellerbranchnumber,
-resellerbranchname,
-CASE
-			WHEN upper(recordsource) = 'ERS_HVM' THEN 'FDO'
-	        WHEN upper(salesofficename) like '%VERTIV%'
-	        or upper(salesofficename) like '%LIEBERT%' THEN 'FDO'
-	        ELSE 'LVO'
-            END office_type,
-uom,
-sales_order_line_type,
-Order_type	
-from 
-(
-select distinct
-commission_allocation,
-account_type_aop ,
-accountam ,
-accountcsm ,
-accountlead ,
-accountpresence ,
-accountservicesales ,
-accountsubtype ,
-accounttype ,
-aop_account_name ,
-aop_category ,
-billtoaccountrole ,
-billtocustomer ,
-billtocustomeraddress ,
-billtocustomercustomertype1 ,
-billtocustomerenterpriseindustry ,
-billtocustomergsc ,
-billtocustomerindustry1 ,
-billtocustomername ,
-billtocustomername2 ,
-billtocustomernumber ,
-billtocustomerparentaccount ,
-billtocustomerpostalcode ,
-billtocustomerstandardizedname ,
-billtocustomervertical ,
-bsid ,
-channelflag ,
-coe ,
-coe_new ,
-contracttype ,
-customerpurchaseordernumber ,
-customerrequestdate ,
-data_last_refreshed ,
-endcustomer ,
-endcustomeraccountrole ,
-endcustomeraddress ,
-endcustomercity ,
-endcustomercountry ,
-endcustomercustomertype1 ,
-endcustomerenterpriseindustry ,
-endcustomergsc ,
-endcustomerindustry1 ,
-endcustomername ,
-endcustomernumber ,
-endcustomerparentaccount ,
-endcustomerpostalcode ,
-endcustomerstandardizedexists ,
-endcustomerstandardizedname ,
-endcustomerstate ,
-endcustomerstate2 ,
-endcustomervertical ,
-exchangerateused ,
-CASE WHEN extendedlistprice<>0 AND c.split_percent IS NOT NULL THEN  nvl(extendedlistprice *(cast(c.split_percent as DOUBLE)/100),extendedlistprice) 
-ELSE extendedlistprice
-END AS extendedlistprice,
-gbu ,
-growth_target ,
-cast(c.split_percent as STRING) as alicecommissionoverridepercent,
-level_6 ,
-CASE WHEN listprice<>0 AND c.split_percent IS NOT NULL THEN nvl(listprice *(cast(c.split_percent as DOUBLE)/100),listprice)
-ELSE listprice
-END AS listprice,
-lob ,
-CASE WHEN netsalesrevenue<>0 AND c.split_percent IS NOT NULL THEN nvl(netsalesrevenue *(cast(c.split_percent as DOUBLE)/100),netsalesrevenue)
-ELSE netsalesrevenue
-END AS netsalesrevenue,
-office_group ,
-office_website ,
-ordercoordinator ,
-ordercreatedate ,
-orderlastupdatedate ,
-orderexlinenumber ,
-partnerwebfolderid ,
-partnerwebquotenumber ,
-plant ,
-plantdescription ,
-product_category ,
-product_category_new ,
-product_family ,
-product_family_new ,
-proshipmentnumber ,
-CASE WHEN quantityordered <>0 AND c.split_percent IS NOT NULL THEN nvl(quantityordered *(cast(c.split_percent as DOUBLE)/100),quantityordered) 
-ELSE quantityordered
-END as quantityordered,
-quoteid ,
-recordsource ,
---c.sales_office_name salesofficename , 
-c1.officename salesofficename , ---- MN 3/4/2022 sales office name change below join Commission Fix 
-c.sales_office_number salesofficenumber,
-c.internal_office_principal_email salesofficeprincipalemail ,
-c.sales_office_number salesofficereferencenumber,
-salesordernumber ,
-c.sales_office_region salesregionname,
-salesregionnumber ,
-c.participant_email salesrepemail ,
-c1.salesrepnumber salesrepid ,
-c.sales_rep_name salesrepname ,
-salesreptype ,
-sapoemtag ,
-selling_motion ,
-orderdeliverypromiseddate ,
-segment ,
-sfr_category ,
-shipdate ,
-shipmentcarriername ,
-CASE WHEN shippedquantity <>0 AND c.split_percent IS NOT NULL THEN nvl(shippedquantity *(cast(c.split_percent as DOUBLE)/100),shippedquantity) 
-ELSE shippedquantity
-END as shippedquantity,
-shiptocustomeraddress ,
-shiptocustomercountry ,
-shiptocustomercustomertype1 ,
-shiptocustomerenterpriseindustry ,
-shiptocustomergsc ,
-shiptocustomerindustry1 ,
-shiptocustomername ,
-shiptocustomernumber ,
-shiptocustomerparentaccount ,
-shiptocustomerstandardizedname ,
-shiptocustomervertical ,
-sizecategory ,
-sku ,
-skudescription ,
-smsbatteriesonlyflag ,
-smsbatteryrbsm ,
-smscontractenddate ,
-smscontractexpiredate ,
-smscontractpms ,
-smscontractsequence ,
-smscontractstartdate ,
-smscontractstatus ,
-smscustomertype ,
-smsequipmentsegment ,
-smsrevcat ,
-smssiteid ,
-smsstackedwhenbooked ,
-smstagnumber ,
-smsticketnumber ,
-smstickettype ,
-soldtocustomercustomertype1 ,
-soldtocustomerenterpriseindustry ,
-soldtocustomergsc ,
-soldtocustomerindustry1 ,
-soldtocustomername ,
-soldtocustomerparentaccount ,
-soldtocustomerstandardizedname ,
-soldtocustomervertical ,
-speed_dial ,
-sales_area ,
-a.w_insert_by ,
-a.w_insert_dtm ,
-a.src_system_name ,
-resellernumber,
-resellerbranchnumber,
-resellerbranchname,
-a.office_type,
-uom,
-sales_order_line_type,
-Order_type
-from @DB_LEVEL@_na_cld_osc_gold.orders_exploration_alice_commn_temp_na a  
-INNER JOIN @DB_LEVEL@_edm_other_src_silver.cpq_commission_split_tbl c ON a.quoteid=c.quotenumber
-AND c.commission_allocation='Territory'
-and CASE 
-	WHEN lob IN ('AC POWER','ENERGY STORAGE') then 'AC_POWER'
-	WHEN lob IN ('RACKS','EDGE THERMAL','IT SYSTEMS','GLOBAL EDGE SYSTEMS','1 PHASE UPS','RACK PDU') then 'CHANNEL'
-	WHEN lob = 'DC POWER' then 'DC_POWER'
-	WHEN lob = 'DIGITAL ECOSYSTEM' then 'MONITORING'
-	WHEN lob IN ('TARRIF SURCHARGE','GENERAL SURCHARGE','NOT APPLICABLE') then 'NO_COMM'		
-	WHEN lob IN ('SERVICES','PARTS','DC POWER SERVICES','VERTIV SERVICES','PROJECT SERVICES','SERVICE AND SOFTWARE SOLUTIONS','SOFTWARE & SOLUTIONS COE','SOFTWARE SOLUTIONS','REGIONAL SERVICES' ) then 'SERVICES'
-	WHEN lob IN ('IMS - ENG & 3RD PARTY','IMS/CUSTOM') then 'SOLUTIONS'
-	WHEN lob = 'THERMAL' then 'THERMAL'
-	WHEN lob IN ('GLOBAL SOLUTIONS','DEFAULT','COMPONENT','EXCLUDE','CUSTOM SKU','QSKU','REGIONAL BUSINESSES','SERVICES & SOFTWARE SOLUTIONS') then NULL
-	--WHEN ordr.lob = 'DEFAULT' then 'ORDER_DEFAULT'		
-	ELSE REPLACE(lob,' ','_')	
-END = c.lob_group
----- MN 3/4/2022 sales office name change below join Commission Fix 
- LEFT outer JOIN 
-(SELECT b.zip_code, fullname, max(salesrepnumber) as salesrepnumber,officenumber,officename FROM @DB_LEVEL@_cld_cpq_silver.cpq_dt_salesrepdetails a
-join @DB_LEVEL@_sql_saleswh_silver.supplier_classification b on (replace(upper(replace(a.officename,'-',' ')),' ','')= replace(upper(replace(b.office_name,'-',' ')),' ','') )
-or (case when b.office_number='89400' then '72300' else b.office_number end = a.officenumber) group by b.zip_code, fullname,officenumber,officename )c1
- on upper(c.sales_rep_name) =upper(c1.fullname) and c.sales_office_number=c1.officenumber
-WHERE (a.endcustomerpostalcode=c1.zip_code  or SPLIT_PART(a.endcustomerpostalcode,' ' ,1)=c1.zip_code ) 
-
---VR 03232022 Below block commented to remove dups (sample salesordernumber '1066687’) and clubbed in the lower block
-/* UNION ALL
-select distinct
-commission_allocation,
-account_type_aop ,
-accountam ,
-accountcsm ,
-accountlead ,
-accountpresence ,
-accountservicesales ,
-accountsubtype ,
-accounttype ,
-aop_account_name ,
-aop_category ,
-billtoaccountrole ,
-billtocustomer ,
-billtocustomeraddress ,
-billtocustomercustomertype1 ,
-billtocustomerenterpriseindustry ,
-billtocustomergsc ,
-billtocustomerindustry1 ,
-billtocustomername ,
-billtocustomername2 ,
-billtocustomernumber ,
-billtocustomerparentaccount ,
-billtocustomerpostalcode ,
-billtocustomerstandardizedname ,
-billtocustomervertical ,
-bsid ,
-channelflag ,
-coe ,
-coe_new ,
-contracttype ,
-customerpurchaseordernumber ,
-customerrequestdate ,
-data_last_refreshed ,
-endcustomer ,
-endcustomeraccountrole ,
-endcustomeraddress ,
-endcustomercity ,
-endcustomercountry ,
-endcustomercustomertype1 ,
-endcustomerenterpriseindustry ,
-endcustomergsc ,
-endcustomerindustry1 ,
-endcustomername ,
-endcustomernumber ,
-endcustomerparentaccount ,
-endcustomerpostalcode ,
-endcustomerstandardizedexists ,
-endcustomerstandardizedname ,
-endcustomerstate ,
-endcustomerstate2 ,
-endcustomervertical ,
-exchangerateused ,
-CASE WHEN extendedlistprice<>0 AND c.split_percent IS NOT NULL THEN  nvl(extendedlistprice *(cast(c.split_percent as DOUBLE)/100),extendedlistprice) 
-ELSE extendedlistprice
-END AS extendedlistprice,
-gbu ,
-growth_target ,
-cast(c.split_percent as STRING) as alicecommissionoverridepercent,
-level_6 ,
-CASE WHEN listprice<>0 AND c.split_percent IS NOT NULL THEN nvl(listprice *(cast(c.split_percent as DOUBLE)/100),listprice)
-ELSE listprice
-END AS listprice,
-lob ,
-CASE WHEN netsalesrevenue<>0 AND c.split_percent IS NOT NULL THEN nvl(netsalesrevenue *(cast(c.split_percent as DOUBLE)/100),netsalesrevenue)
-ELSE netsalesrevenue
-END AS netsalesrevenue,
-office_group ,
-office_website ,
-ordercoordinator ,
-ordercreatedate ,
-orderlastupdatedate ,
-orderexlinenumber ,
-partnerwebfolderid ,
-partnerwebquotenumber ,
-plant ,
-plantdescription ,
-product_category ,
-product_category_new ,
-product_family ,
-product_family_new ,
-proshipmentnumber ,
-CASE WHEN quantityordered <>0 AND c.split_percent IS NOT NULL THEN nvl(quantityordered *(cast(c.split_percent as DOUBLE)/100),quantityordered) 
-ELSE quantityordered
-END as quantityordered,
-quoteid ,
-recordsource ,
---c.sales_office_name salesofficename ,
-c1.officename salesofficename, ---- MN 3/4/2022 sales office name change below join Commission Fix 
-c.sales_office_number salesofficenumber,
-c.internal_office_principal_email salesofficeprincipalemail ,
-c.sales_office_number salesofficereferencenumber,
-salesordernumber ,
-c.sales_office_region salesregionname,
-salesregionnumber ,
-c.participant_email salesrepemail ,
-c1.salesrepnumber salesrepid ,
-c.sales_rep_name salesrepname ,
-salesreptype ,
-sapoemtag ,
-selling_motion ,
-orderdeliverypromiseddate ,
-segment ,
-sfr_category ,
-shipdate ,
-shipmentcarriername ,
-CASE WHEN shippedquantity <>0 AND c.split_percent IS NOT NULL THEN nvl(shippedquantity *(cast(c.split_percent as DOUBLE)/100),shippedquantity) 
-ELSE shippedquantity
-END as shippedquantity,
-shiptocustomeraddress ,
-shiptocustomercountry ,
-shiptocustomercustomertype1 ,
-shiptocustomerenterpriseindustry ,
-shiptocustomergsc ,
-shiptocustomerindustry1 ,
-shiptocustomername ,
-shiptocustomernumber ,
-shiptocustomerparentaccount ,
-shiptocustomerstandardizedname ,
-shiptocustomervertical ,
-sizecategory ,
-sku ,
-skudescription ,
-smsbatteriesonlyflag ,
-smsbatteryrbsm ,
-smscontractenddate ,
-smscontractexpiredate ,
-smscontractpms ,
-smscontractsequence ,
-smscontractstartdate ,
-smscontractstatus ,
-smscustomertype ,
-smsequipmentsegment ,
-smsrevcat ,
-smssiteid ,
-smsstackedwhenbooked ,
-smstagnumber ,
-smsticketnumber ,
-smstickettype ,
-soldtocustomercustomertype1 ,
-soldtocustomerenterpriseindustry ,
-soldtocustomergsc ,
-soldtocustomerindustry1 ,
-soldtocustomername ,
-soldtocustomerparentaccount ,
-soldtocustomerstandardizedname ,
-soldtocustomervertical ,
-speed_dial ,
-sales_area ,
-a.w_insert_by ,
-a.w_insert_dtm ,
-a.src_system_name ,
-resellernumber,
-resellerbranchnumber,
-resellerbranchname,
-a.office_type,
-uom,
-sales_order_line_type,
-Order_type
-from @DB_LEVEL@_na_cld_osc_gold.orders_exploration_alice_commn_temp_na a  
-INNER JOIN @DB_LEVEL@_edm_other_src_silver.cpq_commission_split_tbl c ON ( a.quoteid=c.quotenumber
-AND (c.commission_allocation <>'Territory'--MN Code needs to be joined by LOB to prevent wrong splits
-and CASE 
-	WHEN lob IN ('AC POWER','ENERGY STORAGE') then 'AC_POWER'
-	WHEN lob IN ('RACKS','EDGE THERMAL','IT SYSTEMS','GLOBAL EDGE SYSTEMS','1 PHASE UPS','RACK PDU') then 'CHANNEL'
-	WHEN lob = 'DC POWER' then 'DC_POWER'
-	WHEN lob = 'DIGITAL ECOSYSTEM' then 'MONITORING'
-	WHEN lob IN ('TARRIF SURCHARGE','GENERAL SURCHARGE','NOT APPLICABLE') then 'NO_COMM'		
-	WHEN lob IN ('SERVICES','PARTS','DC POWER SERVICES','VERTIV SERVICES','PROJECT SERVICES','SERVICE AND SOFTWARE SOLUTIONS','SOFTWARE & SOLUTIONS COE','SOFTWARE SOLUTIONS','REGIONAL SERVICES' ) then 'SERVICES'
-	WHEN lob IN ('IMS - ENG & 3RD PARTY','IMS/CUSTOM') then 'SOLUTIONS'
-	WHEN lob = 'THERMAL' then 'THERMAL'
-	WHEN lob IN ('GLOBAL SOLUTIONS','DEFAULT','COMPONENT','EXCLUDE','CUSTOM SKU','QSKU','REGIONAL BUSINESSES','SERVICES & SOFTWARE SOLUTIONS') then NULL
-	--WHEN ordr.lob = 'DEFAULT' then 'ORDER_DEFAULT'		
-	ELSE REPLACE(lob,' ','_')	
-END = c.lob_group
-)or (a.quoteid=c.quotenumber and c.commission_allocation is null and c.lob_group is null and c.split_percent=100)
-)
-	
-LEFT outer JOIN (select  fullname, max(salesrepnumber) as salesrepnumber,officenumber,officename from @DB_LEVEL@_cld_cpq_silver.cpq_dt_salesrepdetails 
-group by fullname,officenumber,officename ) c1  --MN 3/4/2022 Took out parts sub query which were causing dups and removed zip match no longer needed now 
-	on upper(c.sales_rep_name) =upper(c1.fullname) and c.sales_office_number=c1.officenumber
-LEFT OUTER JOIN @DB_LEVEL@_sql_saleswh_silver.supplier_classification b ON c.sales_office_number = b.office_number	
-WHERE c.sales_office_number IS NOT NULL
---and c1.salesrepnumber=a.salesrepid */
-
-UNION All
---MN 3/4/2022 New union block added for no allocation 
-select distinct 
-nvl(commission_allocation,'No Allocation')  as commission_allocation,
-account_type_aop ,
-accountam ,
-accountcsm ,
-accountlead ,
-accountpresence ,
-accountservicesales ,
-accountsubtype ,
-accounttype ,
-aop_account_name ,
-aop_category ,
-billtoaccountrole ,
-billtocustomer ,
-billtocustomeraddress ,
-billtocustomercustomertype1 ,
-billtocustomerenterpriseindustry ,
-billtocustomergsc ,
-billtocustomerindustry1 ,
-billtocustomername ,
-billtocustomername2 ,
-billtocustomernumber ,
-billtocustomerparentaccount ,
-billtocustomerpostalcode ,
-billtocustomerstandardizedname ,
-billtocustomervertical ,
-bsid ,
-channelflag ,
-coe ,
-coe_new ,
-contracttype ,
-customerpurchaseordernumber ,
-customerrequestdate ,
-data_last_refreshed ,
-endcustomer ,
-endcustomeraccountrole ,
-endcustomeraddress ,
-endcustomercity ,
-endcustomercountry ,
-endcustomercustomertype1 ,
-endcustomerenterpriseindustry ,
-endcustomergsc ,
-endcustomerindustry1 ,
-endcustomername ,
-endcustomernumber ,
-endcustomerparentaccount ,
-endcustomerpostalcode ,
-endcustomerstandardizedexists ,
-endcustomerstandardizedname ,
-endcustomerstate ,
-endcustomerstate2 ,
-endcustomervertical ,
-exchangerateused ,
-CASE WHEN extendedlistprice<>0 AND c.split_percent IS NOT NULL THEN  nvl(extendedlistprice *(cast(c.split_percent as DOUBLE)/100),extendedlistprice) 
-ELSE extendedlistprice
-END AS extendedlistprice,
-gbu ,
-growth_target ,
-cast(c.split_percent as STRING) as alicecommissionoverridepercent,
-level_6 ,
-CASE WHEN listprice<>0 AND c.split_percent IS NOT NULL THEN nvl(listprice *(cast(c.split_percent as DOUBLE)/100),listprice)
-ELSE listprice
-END AS listprice,
-lob ,
-CASE WHEN netsalesrevenue<>0 AND c.split_percent IS NOT NULL THEN nvl(netsalesrevenue *(cast(c.split_percent as DOUBLE)/100),netsalesrevenue)
-ELSE netsalesrevenue
-END AS netsalesrevenue,
-office_group ,
-office_website ,
-ordercoordinator ,
-ordercreatedate ,
-orderlastupdatedate ,
-orderexlinenumber ,
-partnerwebfolderid ,
-partnerwebquotenumber ,
-plant ,
-plantdescription ,
-product_category ,
-product_category_new ,
-product_family ,
-product_family_new ,
-proshipmentnumber ,
-CASE WHEN quantityordered <>0 AND c.split_percent IS NOT NULL THEN nvl(quantityordered *(cast(c.split_percent as DOUBLE)/100),quantityordered) 
-ELSE quantityordered
-END as quantityordered,
-quoteid ,
-recordsource ,
---c.sales_office_name salesofficename ,
-c1.officename salesofficename,
-c.sales_office_number salesofficenumber,
-c.internal_office_principal_email salesofficeprincipalemail ,
-c.sales_office_number salesofficereferencenumber,
-salesordernumber ,
-c.sales_office_region salesregionname,
-salesregionnumber ,
-c.participant_email salesrepemail ,
-c1.salesrepnumber salesrepid ,
-c.sales_rep_name salesrepname ,
-salesreptype ,
-sapoemtag ,
-selling_motion ,
-orderdeliverypromiseddate ,
-segment ,
-sfr_category ,
-shipdate ,
-shipmentcarriername ,
-CASE WHEN shippedquantity <>0 AND c.split_percent IS NOT NULL THEN nvl(shippedquantity *(cast(c.split_percent as DOUBLE)/100),shippedquantity) 
-ELSE shippedquantity
-END as shippedquantity,
-shiptocustomeraddress ,
-shiptocustomercountry ,
-shiptocustomercustomertype1 ,
-shiptocustomerenterpriseindustry ,
-shiptocustomergsc ,
-shiptocustomerindustry1 ,
-shiptocustomername ,
-shiptocustomernumber ,
-shiptocustomerparentaccount ,
-shiptocustomerstandardizedname ,
-shiptocustomervertical ,
-sizecategory ,
-sku ,
-skudescription ,
-smsbatteriesonlyflag ,
-smsbatteryrbsm ,
-smscontractenddate ,
-smscontractexpiredate ,
-smscontractpms ,
-smscontractsequence ,
-smscontractstartdate ,
-smscontractstatus ,
-smscustomertype ,
-smsequipmentsegment ,
-smsrevcat ,
-smssiteid ,
-smsstackedwhenbooked ,
-smstagnumber ,
-smsticketnumber ,
-smstickettype ,
-soldtocustomercustomertype1 ,
-soldtocustomerenterpriseindustry ,
-soldtocustomergsc ,
-soldtocustomerindustry1 ,
-soldtocustomername ,
-soldtocustomerparentaccount ,
-soldtocustomerstandardizedname ,
-soldtocustomervertical ,
-speed_dial ,
-sales_area ,
-a.w_insert_by ,
-a.w_insert_dtm ,
-a.src_system_name ,
-resellernumber,
-resellerbranchnumber,
-resellerbranchname,
-a.office_type,
-uom,
-sales_order_line_type,
-Order_type
-from @DB_LEVEL@_na_cld_osc_gold.orders_exploration_alice_commn_temp_na a 
-inner join   ( Select distinct quotenumber,commission_allocation,lob_group,sales_office_number,split_percent,internal_office_principal_email,participant_email,
-   sales_office_region,sales_rep_name from  @DB_LEVEL@_edm_other_src_silver.cpq_commission_split_tbl) c  ON a.quoteid=c.quotenumber
-AND  (a.quoteid=c.quotenumber and c.commission_allocation is null and c.lob_group is null and c.split_percent=100)
-OR 
-(
-( a.quoteid=c.quotenumber
-AND (c.commission_allocation <>'Territory'--MN Code needs to be joined by LOB to prevent wrong splits
-and CASE 
-	WHEN lob IN ('AC POWER','ENERGY STORAGE') then 'AC_POWER'
-	WHEN lob IN ('RACKS','EDGE THERMAL','IT SYSTEMS','GLOBAL EDGE SYSTEMS','1 PHASE UPS','RACK PDU') then 'CHANNEL'
-	WHEN lob = 'DC POWER' then 'DC_POWER'
-	WHEN lob = 'DIGITAL ECOSYSTEM' then 'MONITORING'
-	WHEN lob IN ('TARRIF SURCHARGE','GENERAL SURCHARGE','NOT APPLICABLE') then 'NO_COMM'		
-	WHEN lob IN ('SERVICES','PARTS','DC POWER SERVICES','VERTIV SERVICES','PROJECT SERVICES','SERVICE AND SOFTWARE SOLUTIONS','SOFTWARE & SOLUTIONS COE','SOFTWARE SOLUTIONS','REGIONAL SERVICES' ) then 'SERVICES'
-	WHEN lob IN ('IMS - ENG & 3RD PARTY','IMS/CUSTOM') then 'SOLUTIONS'
-	WHEN lob = 'THERMAL' then 'THERMAL'
-	WHEN lob IN ('GLOBAL SOLUTIONS','DEFAULT','COMPONENT','EXCLUDE','CUSTOM SKU','QSKU','REGIONAL BUSINESSES','SERVICES & SOFTWARE SOLUTIONS') then NULL
-	--WHEN ordr.lob = 'DEFAULT' then 'ORDER_DEFAULT'		
-	ELSE REPLACE(lob,' ','_')	
-END = c.lob_group
-)or (a.quoteid=c.quotenumber and c.commission_allocation is null and c.lob_group is null and c.split_percent=100)
-)
-)
-
-LEFT outer JOIN (select  fullname, max(salesrepnumber) as salesrepnumber,officenumber,officename from @DB_LEVEL@_cld_cpq_silver.cpq_dt_salesrepdetails 
-group by fullname,officenumber,officename ) c1  -- 3/4/2022 Took out parts sub query which were causing dups and removed zip match no longer needed now 
-	on upper(c.sales_rep_name) =upper(c1.fullname) and c.sales_office_number=c1.officenumber
-LEFT OUTER JOIN @DB_LEVEL@_sql_saleswh_silver.supplier_classification b ON c.sales_office_number = b.office_number
-WHERE c.sales_office_number IS NOT NULL
-
-UNION ALL
-
-select  -- MN 3/1/2022 Added LES Migrated Orders Commissions 
-c.split_type as commission_allocation,
-account_type_aop ,
-accountam ,
-accountcsm ,
-accountlead ,
-accountpresence ,
-accountservicesales ,
-accountsubtype ,
-accounttype ,
-aop_account_name ,
-aop_category ,
-billtoaccountrole ,
-billtocustomer ,
-billtocustomeraddress ,
-billtocustomercustomertype1 ,
-billtocustomerenterpriseindustry ,
-billtocustomergsc ,
-billtocustomerindustry1 ,
-billtocustomername ,
-billtocustomername2 ,
-billtocustomernumber ,
-billtocustomerparentaccount ,
-billtocustomerpostalcode ,
-billtocustomerstandardizedname ,
-billtocustomervertical ,
-bsid ,
-channelflag ,
-coe ,
-coe_new ,
-contracttype ,
-customerpurchaseordernumber ,
-customerrequestdate ,
-data_last_refreshed ,
-endcustomer ,
-endcustomeraccountrole ,
-endcustomeraddress ,
-endcustomercity ,
-endcustomercountry ,
-endcustomercustomertype1 ,
-endcustomerenterpriseindustry ,
-endcustomergsc ,
-endcustomerindustry1 ,
-endcustomername ,
-endcustomernumber ,
-endcustomerparentaccount ,
-endcustomerpostalcode ,
-endcustomerstandardizedexists ,
-endcustomerstandardizedname ,
-endcustomerstate ,
-endcustomerstate2 ,
-endcustomervertical ,
-exchangerateused ,
-CASE WHEN extendedlistprice<>0 AND c.split_percent IS NOT NULL THEN  nvl(extendedlistprice *(cast(c.split_percent as DOUBLE)/100),extendedlistprice) 
-ELSE extendedlistprice
-END AS extendedlistprice,
-gbu ,
-growth_target ,
-cast(c.split_percent as STRING) as alicecommissionoverridepercent,
-level_6 ,
-CASE WHEN listprice<>0 AND c.split_percent IS NOT NULL THEN nvl(listprice *(cast(c.split_percent as DOUBLE)/100),listprice)
-ELSE listprice
-END AS listprice,
-lob ,
-CASE WHEN netsalesrevenue<>0 AND c.split_percent IS NOT NULL THEN nvl(netsalesrevenue *(cast(c.split_percent as DOUBLE)/100),netsalesrevenue)
-ELSE netsalesrevenue
-END AS netsalesrevenue,
-office_group ,
-office_website ,
-ordercoordinator ,
-ordercreatedate ,
-orderlastupdatedate ,
-orderexlinenumber ,
-partnerwebfolderid ,
-partnerwebquotenumber ,
-plant ,
-plantdescription ,
-product_category ,
-product_category_new ,
-product_family ,
-product_family_new ,
-proshipmentnumber ,
-CASE WHEN quantityordered <>0 AND c.split_percent IS NOT NULL THEN nvl(quantityordered *(cast(c.split_percent as DOUBLE)/100),quantityordered) 
-ELSE quantityordered
-END as quantityordered,
-quoteid ,
-recordsource ,
-c.sales_office_name salesofficename ,
-c.sales_office_number salesofficenumber,
-c.internal_office_principal_email salesofficeprincipalemail ,
-c.sales_office_number salesofficereferencenumber,
-salesordernumber ,
-c.sales_office_region salesregionname,
-salesregionnumber ,
-c.participant_email salesrepemail ,
-c.salesrepnumber salesrepid ,
-c.sales_rep_name salesrepname ,
-salesreptype ,
-sapoemtag ,
-selling_motion ,
-orderdeliverypromiseddate ,
-segment ,
-sfr_category ,
-shipdate ,
-shipmentcarriername ,
-CASE WHEN shippedquantity <>0 AND c.split_percent IS NOT NULL THEN nvl(shippedquantity *(cast(c.split_percent as DOUBLE)/100),shippedquantity) 
-ELSE shippedquantity
-END as shippedquantity,
-shiptocustomeraddress ,
-shiptocustomercountry ,
-shiptocustomercustomertype1 ,
-shiptocustomerenterpriseindustry ,
-shiptocustomergsc ,
-shiptocustomerindustry1 ,
-shiptocustomername ,
-shiptocustomernumber ,
-shiptocustomerparentaccount ,
-shiptocustomerstandardizedname ,
-shiptocustomervertical ,
-sizecategory ,
-sku ,
-skudescription ,
-smsbatteriesonlyflag ,
-smsbatteryrbsm ,
-smscontractenddate ,
-smscontractexpiredate ,
-smscontractpms ,
-smscontractsequence ,
-smscontractstartdate ,
-smscontractstatus ,
-smscustomertype ,
-smsequipmentsegment ,
-smsrevcat ,
-smssiteid ,
-smsstackedwhenbooked ,
-smstagnumber ,
-smsticketnumber ,
-smstickettype ,
-soldtocustomercustomertype1 ,
-soldtocustomerenterpriseindustry ,
-soldtocustomergsc ,
-soldtocustomerindustry1 ,
-soldtocustomername ,
-soldtocustomerparentaccount ,
-soldtocustomerstandardizedname ,
-soldtocustomervertical ,
-speed_dial ,
-sales_area ,
-a.w_insert_by ,
-a.w_insert_dtm ,
-a.src_system_name ,
-resellernumber,
-resellerbranchnumber,
-resellerbranchname,
-a.office_type,
-uom,
-sales_order_line_type,
-Order_type
-from @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_bkp a  
-inner join @DB_LEVEL@_sql_saleswh_gold.LES_commission_split_vw c on a.quoteid=c.reference_les_order
-and (NVL(upper(c.split_type),'') not like '%STARTUP%')
-where BSID is null  --MN 3/4/2022 New condition added
-
-UNION ALL
-
-select '' as commission_allocation,* from @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_bkp where (recordsource<>'ALICE' ) 
-
-UNION ALL
-
-select '' as commission_allocation,* from 
-(select * from @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_bkp where recordsource='ALICE'
-) a 
-where not exists
-(
-select * from 
-(select
-	oe.order_number,
-	ca.orcl_erp_ordernumber_t,
-	ca.transactionid_t quoteid ,
-	ca.bs_id
-from
-	@DB_LEVEL@_cld_cpq_silver.cpq_quote_headers ca
-join
-@DB_LEVEL@_ora_alice_silver.alice_oe_order_headers_all oe on
-	oe.orig_sys_document_ref = ca.transactionid_t) b where
-a.salesordernumber=cast(b.order_number as STRING)	
-)
-
-UNION ALL -- MN 3/1/2022 Migrated Orders Commission Fix 
-select ''as commission_allocation,* from 
-(select * from @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_bkp where recordsource='ALICE' and BSID is  null and quoteid not like 'CPQ-%' 
-) a 
-where not exists
-(
-select * from 
-(select
- reference_les_order from 
-	@DB_LEVEL@_sql_saleswh_gold.LES_commission_split_vw	) b where
-a.quoteid=b.reference_les_order)
-
-)w ;
-
-
-8. orders_exploration_data_na_Final
+6.orders_exploration_data_na_Final
 
 
 insert overwrite @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_tmp1
@@ -4989,7 +3663,8 @@ select
 	upper(BillToCustomerSubClass), --so-728 new attributes addition starts
     upper(EndCustomerSubClass),
     upper(ShipToCustomerSubClass),
-    upper(SoldToCustomerSubClass) --so-728 new attributes addition ends
+    upper(SoldToCustomerSubClass), --so-728 new attributes addition ends
+	upper(aop_customer_sub_class)
 	
 from 
 @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na a
@@ -5272,10 +3947,12 @@ END growth_target,--modified by HARI (Implemented the growth_target logic in fin
 	upper(BillToCustomerSubClass), --so-728 new attributes addition starts
     upper(EndCustomerSubClass),
     upper(ShipToCustomerSubClass),
-    upper(SoldToCustomerSubClass) --so-728 new attributes addition ends
+    upper(SoldToCustomerSubClass), --so-728 new attributes addition ends
+	upper(aop_customer_sub_class)
 	
 from
 @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_tmp1;
 
 invalidate metadata @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_tmp1;
 
+							
