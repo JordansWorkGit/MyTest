@@ -1,6 +1,6 @@
 1.INVALIDATE METADATA
 
-
+--Release date : 06/09/2022
 
 invalidate metadata @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_tmp;
 invalidate metadata @DB_LEVEL@_edm_gold.f_sales_order_line;
@@ -76,6 +76,7 @@ invalidate metadata @DB_LEVEL@_geist_silver.geist_G_Arinvt_Tech_Info;
 invalidate metadata @DB_LEVEL@_geist_silver.geist_arinvt;
 invalidate metadata @DB_LEVEL@_geist_silver.geist_eplant;
 invalidate metadata @DB_LEVEL@_geist_silver.geist_currency;
+
 
 
 
@@ -376,7 +377,6 @@ SELECT
 	SalesRepID,
 	SalesRepName,
 	SalesRepType,
-	SAPOEMTag,
 	Selling_Motion,
 	OrderDeliveryPromisedDate,
 	Segment,
@@ -398,22 +398,8 @@ SELECT
 	sizecategory,
 	upper(SKU_rollup),
 	upper(SKUDescription),
-	SMSBatteriesOnlyFlag,
-	SMSBatteryRBSM,
-	SMSContractEndDate,
-	SMSContractExpireDate,
-	SMSContractPMs,
-	SMSContractSequence,
-	SMSContractStartDate,
-	SMSContractStatus,
 	SMSCustomerType,
-	SMSEquipmentSegment,
-	SMSRevCat,
-	SMSSiteId,
-	SMSStackedWhenBooked,
 	SMSTagNumber,
-	SMSTicketNumber,
-	SMSTicketType,
 	upper(SoldToCustomerCustomerType1),
 	upper(SoldToCustomerEnterpriseIndustry),
 	upper(SoldToCustomerGSC),
@@ -422,7 +408,6 @@ SELECT
 	upper(SoldToCustomerParentAccount),
 	upper(SoldToCustomerStandardizedName),
 	upper(SoldToCustomerVertical),
-	SPEED_DIAL,
 	Sales_Area,
 	effective_user() as w_insert_by,
 	now() as w_insert_dtm,
@@ -735,7 +720,7 @@ CASE
 			WHEN aop_account_name = 'DELL' THEN 'NULL'
 			WHEN nvl(dc_h.customer_sub_class, 'N') != 'N' THEN dc_h.customer_sub_class
 			WHEN nvl(b.sm_sku, 'N') != 'N'  THEN 'OEM'
-			ELSE 'NULL'
+			--ELSE 'NULL'
 		END aop_customer_sub_class
 FROM
 	(
@@ -1108,7 +1093,6 @@ FROM
 			--rep.sales_rep_name SalesRepName,
 			case when ordr.src_system_name = 'ALICE' then ordr_extn.sales_rep_name else rep.sales_rep_name end as SalesRepName,
 			'' SalesRepType,
-			'' SAPOEMTag,
 			ordr.order_delivery_promise_dt OrderDeliveryPromisedDate,
 			'' Segment,
 			'' SFR_Category,
@@ -1152,22 +1136,8 @@ FROM
 			case when NVL(ordr.product_num,pm.projectcode) = sku_lu.sku and ordr.src_system_name = sku_lu.recordsource then sku_lu.skudescription
 			else prod.product_desc
 			end SKUDescription,
-			'' SMSBatteriesOnlyFlag,
-			'' SMSBatteryRBSM,
-			'' SMSContractEndDate,
-			'' SMSContractExpireDate,
-			'' SMSContractPMs,
-			'' SMSContractSequence,
-			'' SMSContractStartDate,
-			'' SMSContractStatus,
 			trim(sms.sms_customer_type) SMSCustomerType,
-			'' SMSEquipmentSegment,
-			'' SMSRevCat,
-			'' SMSSiteId,
-			'' SMSStackedWhenBooked,
 			'' SMSTagNumber,
-			'' SMSTicketNumber,
-			'' SMSTicketType,
 			'' SoldToCustomerCustomerType1,
 			'' SoldToCustomerEnterpriseIndustry,
 			'' SoldToCustomerGSC,
@@ -1191,7 +1161,6 @@ FROM
 			--'' SoldToCustomerVertical,
 			--nvl(sold_acc.market_sub_vertical_txt,'NULL') SoldToCustomerVertical,
 			nvl(sold_acc.market_vertical_txt,'NULL') SoldToCustomerVertical,--mapping changed SoldToCustomerVertical so-621
-			'' SPEED_DIAL,
 			roi.sales_area Sales_Area,
 			end_ref.customer end_customer,
 			bill_ref.customer bill_customer,
@@ -1929,7 +1898,8 @@ LEFT OUTER JOIN
 			group by a.salesordernumber, a.orderexlinenumber, a.lob, a.gbu 
 		) sn on a.salesordernumber = sn.salesordernumber and a.orderexlinenumber = sn.orderexlinenumber and a.lob = sn.lob and a.gbu = sn.gbu 
 		) b 
-		 left outer join (select distinct customer_sub_class,customer_name_txt from @DB_LEVEL@_mdm_hub_gold.d_customer_header) dc_h on
+		 left outer join (select distinct customer_sub_class,customer_name_txt from @DB_LEVEL@_mdm_hub_gold.d_customer_header
+		 where customer_class_code_txt = 'GLOBAL STRATEGIC ACCOUNT') dc_h on
 				  upper(aop_account_name) = upper(dc_h.customer_name_txt)
 		)dt )tt )st)s1;
 		
@@ -2026,7 +1996,6 @@ LEFT OUTER JOIN
 	SalesRepID,
 	SalesRepName,
 	SalesRepType,
-	SAPOEMTag,
 	Selling_Motion,
 	OrderDeliveryPromisedDate,
 	Segment,
@@ -2048,22 +2017,8 @@ LEFT OUTER JOIN
 	sizecategory,
 	SKU,
 	SKUDescription,
-	SMSBatteriesOnlyFlag,
-	SMSBatteryRBSM,
-	SMSContractEndDate,
-	SMSContractExpireDate,
-	SMSContractPMs,
-	SMSContractSequence,
-	SMSContractStartDate,
-	SMSContractStatus,
 	SMSCustomerType,
-	SMSEquipmentSegment,
-	SMSRevCat,
-	SMSSiteId,
-	SMSStackedWhenBooked,
 	SMSTagNumber,
-	SMSTicketNumber,
-	SMSTicketType,
 	SoldToCustomerCustomerType1,
 	SoldToCustomerEnterpriseIndustry,
 	SoldToCustomerGSC,
@@ -2072,7 +2027,6 @@ LEFT OUTER JOIN
 	SoldToCustomerParentAccount,
 	SoldToCustomerStandardizedName,
 	SoldToCustomerVertical,
-	SPEED_DIAL,
 	Sales_Area,
 	effective_user() as w_insert_by,
 	now() as w_insert_dtm,
@@ -2250,7 +2204,7 @@ select distinct *,
 		upper(b.attn) BillToCustomerName,
 		'' BillToCustomerName2,
 		trim(upper(c.custno)) BillToCustomerNumber,
-		'' BillToCustomerParentAccount,
+		dch_v.ultimate_parent_txt BillToCustomerParentAccount,
 		trim(upper(b.zip)) BillToCustomerPostalCode,
 		upper(b.attn) BillToCustomerStandardizedName,
 		'' BillToCustomerVertical,
@@ -2287,7 +2241,7 @@ select distinct *,
 		'' EndCustomerIndustry1,
 		upper(s.attn) EndCustomerName,
 		trim(upper(c.custno)) EndCustomerNumber,
-		'' EndCustomerParentAccount,
+		dch_v.ultimate_parent_txt EndCustomerParentAccount,
 		trim(upper(s.zip)) EndCustomerPostalCode,
 		'' EndCustomerStandardizedExists,
 		'' EndCustomerStandardizedName,
@@ -2342,7 +2296,6 @@ select distinct *,
 		'' SalesRepID,
 		'' SalesRepName,
 		'' SalesRepType,
-		'' SAPOEMTag,
 		cast('' as timestamp) OrderDeliveryPromisedDate,
 		'' Segment,
 		'' SFR_Category,
@@ -2380,22 +2333,8 @@ select distinct *,
 		'' sizecategory,
 		upper(trim(i.itemno)) as SKU,
 		upper(i.descrip) SKUDescription,
-		'' SMSBatteriesOnlyFlag,
-		'' SMSBatteryRBSM,
-		'' SMSContractEndDate,
-		'' SMSContractExpireDate,
-		'' SMSContractPMs,
-		'' SMSContractSequence,
-		'' SMSContractStartDate,
-		'' SMSContractStatus,
 		'' SMSCustomerType,
-		'' SMSEquipmentSegment,
-		'' SMSRevCat,
-		'' SMSSiteId,
-		'' SMSStackedWhenBooked,
 		'' SMSTagNumber,
-		'' SMSTicketNumber,
-		'' SMSTicketType,
 		'' SoldToCustomerCustomerType1,
 		'' SoldToCustomerEnterpriseIndustry,
 		'' SoldToCustomerGSC,
@@ -2404,7 +2343,6 @@ select distinct *,
 		'' SoldToCustomerParentAccount,
 		'' SoldToCustomerStandardizedName,
 		'' SoldToCustomerVertical,
-		'' SPEED_DIAL,
 		'' Sales_Area,
 		effective_user() as w_insert_by,
 		now() as w_insert_dtm,
@@ -2605,8 +2543,6 @@ AND ((trim(C.CUSTNO) NOT IN ('GA777','GT50') AND O.EPLANT_ID=3)
 compute stats @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na;
                         
                             
-                            
-							
 4.populate_comm_split_and_order_bkp_tbl
 
 -----Populate cpq_commission_split_tbl from cpq_commission_split_vw to improve performance.
@@ -3247,7 +3183,6 @@ SELECT  a.account_type_aop ,
 		b.salesrepnumber salesrepid ,
 		b.sales_rep_name salesrepname ,
 		a.salesreptype ,
-		a.sapoemtag ,
 		a.selling_motion ,
 		a.orderdeliverypromiseddate ,
 		a.segment ,
@@ -3274,22 +3209,8 @@ SELECT  a.account_type_aop ,
 		a.sizecategory ,
 		a.sku ,
 		a.skudescription ,
-		a.smsbatteriesonlyflag ,
-		a.smsbatteryrbsm ,
-		a.smscontractenddate ,
-		a.smscontractexpiredate ,
-		a.smscontractpms ,
-		a.smscontractsequence ,
-		a.smscontractstartdate ,
-		a.smscontractstatus ,
 		a.smscustomertype ,
-		a.smsequipmentsegment ,
-		a.smsrevcat ,
-		a.smssiteid ,
-		a.smsstackedwhenbooked ,
 		a.smstagnumber ,
-		a.smsticketnumber ,
-		a.smstickettype ,
 		a.soldtocustomercustomertype1 ,
 		a.soldtocustomerenterpriseindustry ,
 		a.soldtocustomergsc ,
@@ -3298,7 +3219,6 @@ SELECT  a.account_type_aop ,
 		a.soldtocustomerparentaccount ,
 		a.soldtocustomerstandardizedname ,
 		a.soldtocustomervertical ,
-		a.speed_dial ,
 		a.sales_area ,
 		a.w_insert_by ,
 		a.w_insert_dtm ,
@@ -3407,7 +3327,6 @@ and a.endcustomerpostalcode = b.endcustomerpostalcode
 and a.lob = b.lob
 and a.recordsource = b.recordsource
 
-
 6.orders_exploration_data_na_Final
 
 
@@ -3501,7 +3420,6 @@ select
 	SalesRepID,
 	SalesRepName,
 	SalesRepType,
-	SAPOEMTag,
 	Selling_Motion,
 	OrderDeliveryPromisedDate,
 	Segment,
@@ -3539,22 +3457,8 @@ select
             END AS sizecategory,
 	upper(a.SKU) SKU,
 	upper(SKUDescription) SKUDescription,
-	SMSBatteriesOnlyFlag,
-	SMSBatteryRBSM,
-	SMSContractEndDate,
-	SMSContractExpireDate,
-	SMSContractPMs,
-	SMSContractSequence,
-	SMSContractStartDate,
-	SMSContractStatus,
 	SMSCustomerType,
-	SMSEquipmentSegment,
-	SMSRevCat,
-	SMSSiteId,
-	SMSStackedWhenBooked,
 	SMSTagNumber,
-	SMSTicketNumber,
-	SMSTicketType,
 	upper(SoldToCustomerCustomerType1) SoldToCustomerCustomerType1,
 	upper(SoldToCustomerEnterpriseIndustry) SoldToCustomerEnterpriseIndustry,
 	upper(SoldToCustomerGSC) SoldToCustomerGSC,
@@ -3563,7 +3467,6 @@ select
 	upper(SoldToCustomerParentAccount) SoldToCustomerParentAccount,
 	upper(SoldToCustomerStandardizedName) SoldToCustomerStandardizedName,
 	upper(SoldToCustomerVertical) SoldToCustomerVertical,
-	SPEED_DIAL,
 	Sales_Area,
 	effective_user() as w_insert_by,
 	now() as w_insert_dtm,
@@ -3801,7 +3704,6 @@ END growth_target,--modified by HARI (Implemented the growth_target logic in fin
 	SalesRepID,
 	SalesRepName,
 	SalesRepType,
-	SAPOEMTag,
 	Selling_Motion,
 	OrderDeliveryPromisedDate,
 	Segment,
@@ -3823,22 +3725,8 @@ END growth_target,--modified by HARI (Implemented the growth_target logic in fin
 	sizecategory,
 	upper(SKU),
 	upper(SKUDescription),
-	SMSBatteriesOnlyFlag,
-	SMSBatteryRBSM,
-	SMSContractEndDate,
-	SMSContractExpireDate,
-	SMSContractPMs,
-	SMSContractSequence,
-	SMSContractStartDate,
-	SMSContractStatus,
 	SMSCustomerType,
-	SMSEquipmentSegment,
-	SMSRevCat,
-	SMSSiteId,
-	SMSStackedWhenBooked,
 	SMSTagNumber,
-	SMSTicketNumber,
-	SMSTicketType,
 	upper(SoldToCustomerCustomerType1),
 	upper(SoldToCustomerEnterpriseIndustry),
 	upper(SoldToCustomerGSC),
@@ -3847,7 +3735,6 @@ END growth_target,--modified by HARI (Implemented the growth_target logic in fin
 	upper(SoldToCustomerParentAccount),
 	upper(SoldToCustomerStandardizedName),
 	upper(SoldToCustomerVertical),
-	SPEED_DIAL,
 	Sales_Area,
 	effective_user() as w_insert_by,
 	now() as w_insert_dtm,
@@ -3955,4 +3842,4 @@ from
 
 invalidate metadata @DB_LEVEL@_na_cld_osc_gold.orders_exploration_data_na_tmp1;
 
-							
+                            
