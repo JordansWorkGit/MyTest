@@ -1,6 +1,6 @@
-1. INVALIDATE_METADATA
+1.INVALIDATE_METADATA
 
---release date:21/07/2022
+--RELEASE DATE:06/09/2022
 
 invalidate metadata @DB_LEVEL@_edm_other_src_silver.pos_na_stg;
 invalidate metadata @DB_LEVEL@_context_silver.ctx_sales;
@@ -20,7 +20,7 @@ invalidate metadata @DB_LEVEL@_edm_other_src_silver.americas_channel_commission_
 invalidate metadata @DB_LEVEL@_edm_other_src_silver.americas_channel_comission_sp2_dop_claim;
 invalidate metadata @DB_LEVEL@_na_cld_osc_gold.pos_na;
 
-2. Populate_stage_table
+2.Populate_stage_table
 
 INSERT
 	INTO
@@ -278,7 +278,8 @@ SELECT
 	upper(BillToCustomerSubClass), --so-728 new attributes addition starts
 	upper(EndCustomerSubClass),
 	upper(ShipToCustomerSubClass),
-	upper(SoldToCustomerSubClass) --so-728 new attributes addition ends
+	upper(SoldToCustomerSubClass), --so-728 new attributes addition ends
+	upper(SerialNumber)
 FROM
 	(
 	SELECT
@@ -595,14 +596,11 @@ FROM
 		end_ship_ch.services_major_acc EndServicesMajorAcc,
 		end_ship_ch.services_major_acc ShipToServicesMajorAcc,
 		bill_sold_ch.services_major_acc SoldToServicesMajorAcc,
-		'' BillToCustomerSubClass, --so-728 new attributes addition starts
-		'' EndCustomerSubClass,
-		'' ShipToCustomerSubClass,
-		'' SoldToCustomerSubClass  --so-728 new attributes addition ends
-		/* bill_sold_ch.customer_sub_class BillToCustomerSubClass,  --so-728 new attributes addition starts
+		bill_sold_ch.customer_sub_class BillToCustomerSubClass,  --so-728 new attributes addition starts
 		end_ship_ch.customer_sub_class EndCustomerSubClass,
 		end_ship_ch.customer_sub_class ShipToCustomerSubClass,
-		bill_sold_ch.customer_sub_class SoldToCustomerSubClass --so-728 new attributes addition ends */
+		bill_sold_ch.customer_sub_class SoldToCustomerSubClass, --so-728 new attributes addition ends 
+		cs.serial_number SerialNumber
 	FROM
 		(select * from @DB_LEVEL@_context_silver.ctx_sales 
 		where source = 'USA' 
@@ -623,7 +621,7 @@ FROM
 		(SELECT distinct industry_classification_1_txt,industry_classification_2_txt,industry_classification_3_txt,ultimate_parent_txt,customer_name_txt,customer_number,
 						 market_sub_vertical_txt,customer_type_txt,market_vertical_txt,city_primary_txt,country_primary_cd,integration_id_join,src_system_name,customer_class_code_txt,
 						 partner_class_code_txt,oracle_cloud_registry_id,reporting_sub_parent1,definitive_idn_id,definitive_idn_parentid,nces_leaid,buying_customer_flg,services_major_acc
-						 /* ,customer_sub_class  --so-728 */
+						  ,customer_sub_class  
 				FROM @DB_LEVEL@_mdm_hub_gold.d_customer_header_v where src_system_name like '%CONTEXT%USA%') bill_sold_ch ON 
 		cs.context_reseller_id=bill_sold_ch.integration_id_join
     LEFT OUTER JOIN 
@@ -635,7 +633,7 @@ FROM
 		(SELECT distinct industry_classification_1_txt,industry_classification_2_txt,industry_classification_3_txt,ultimate_parent_txt,customer_name_txt,customer_number,
 						 market_sub_vertical_txt,customer_type_txt,market_vertical_txt,city_primary_txt,country_primary_cd,integration_id_join,src_system_name,customer_class_code_txt,
 						 partner_class_code_txt,oracle_cloud_registry_id,reporting_sub_parent1,definitive_idn_id,definitive_idn_parentid,nces_leaid,buying_customer_flg,services_major_acc
-						 /* ,customer_sub_class  --so-728 */
+						  ,customer_sub_class  
 				FROM @DB_LEVEL@_mdm_hub_gold.d_customer_header_v where src_system_name like '%CONTEXT%USA%') end_ship_ch ON 
 		cs.shipped_to_reseller_id=end_ship_ch.integration_id_join
 	LEFT OUTER JOIN 
@@ -779,7 +777,8 @@ FROM
 		--commenting the join as roi fields to be populated later on
 ) a;
 
-3. Rule1_logic_stg_temp_insert
+
+3.Rule1_logic_stg_temp_insert
 
 INSERT INTO @DB_LEVEL@_edm_other_src_silver.pos_na_temp
 select 
@@ -1037,7 +1036,8 @@ stg.soldtoservicesmajoracc,  --so-665 new attributes addition ends
 stg.billtocustomersubclass, --so-728 new attributes addition starts
 stg.endcustomersubclass,
 stg.shiptocustomersubclass,
-stg.soldtocustomersubclass  --so-728 new attributes addition ends
+stg.soldtocustomersubclass,  --so-728 new attributes addition ends
+stg.serialnumber
 
 from @DB_LEVEL@_edm_other_src_silver.pos_na_stg stg left outer join
 @DB_LEVEL@_edm_other_src_silver.canada_pos_cd_lst cpl on
@@ -1056,7 +1056,7 @@ select * from @DB_LEVEL@_edm_other_src_silver.pos_na_temp;
 truncate table @DB_LEVEL@_edm_other_src_silver.pos_na_temp;
 
 
-4. Rule2_logic_stg_temp_insert
+4.Rule2_logic_stg_temp_insert
 
 INSERT INTO @DB_LEVEL@_edm_other_src_silver.pos_na_temp
 select 
@@ -1314,7 +1314,8 @@ stg.soldtoservicesmajoracc,  --so-665 new attributes addition ends
 stg.billtocustomersubclass, --so-728 new attributes addition starts
 stg.endcustomersubclass,
 stg.shiptocustomersubclass,
-stg.soldtocustomersubclass  --so-728 new attributes addition ends
+stg.soldtocustomersubclass,  --so-728 new attributes addition ends,
+stg.serialnumber
 
 from @DB_LEVEL@_edm_other_src_silver.pos_na_stg stg left outer join
 @DB_LEVEL@_edm_other_src_silver.usa_pos_cd_lst upl on
@@ -1582,8 +1583,8 @@ pnt.soldtoservicesmajoracc,  --so-665 new attributes addition ends
 pnt.billtocustomersubclass, --so-728 new attributes addition starts
 pnt.endcustomersubclass,
 pnt.shiptocustomersubclass,
-pnt.soldtocustomersubclass  --so-728 new attributes addition ends
-
+pnt.soldtocustomersubclass,  --so-728 new attributes addition ends
+pnt.serialnumber
 from 
 @DB_LEVEL@_edm_other_src_silver.pos_na_temp pnt
 left outer join @DB_LEVEL@_edm_other_src_silver.rep_office_info roi
@@ -1591,7 +1592,8 @@ on pnt.salesofficenumber =roi.office_location;
 
 truncate table @DB_LEVEL@_edm_other_src_silver.pos_na_temp;
 
-5. Rule3_stg_to_temp
+
+5.Rule3_stg_to_temp
 
 INSERT INTO @DB_LEVEL@_edm_other_src_silver.pos_na_temp
 (
@@ -1843,7 +1845,8 @@ soldtoservicesmajoracc,   --so-665 new attributes addition ends
 billtocustomersubclass, --so-728 new attributes addition starts
 endcustomersubclass,
 shiptocustomersubclass,
-soldtocustomersubclass  --so-728 new attributes addition ends
+soldtocustomersubclass,  --so-728 new attributes addition ends
+serialnumber
 )
 select
 stg.accountservicesales as accountservicesales,
@@ -2102,21 +2105,23 @@ stg.soldtoservicesmajoracc as soldtoservicesmajoracc,   --so-665 new attributes 
 stg.billtocustomersubclass as billtocustomersubclass, --so-728 new attributes addition starts
 stg.endcustomersubclass as endcustomersubclass,
 stg.shiptocustomersubclass as shiptocustomersubclass,
-stg.soldtocustomersubclass as soldtocustomersubclass  --so-728 new attributes addition ends
+stg.soldtocustomersubclass as soldtocustomersubclass,  --so-728 new attributes addition ends
+stg.serialnumber as serialnumber
 
 from @DB_LEVEL@_edm_other_src_silver.pos_na_stg stg 
 left outer join @DB_LEVEL@_edm_other_src_silver.product_family_classification pf
 on stg.productfamily = pf.product_family ;
 
 
-6. Rule3_temp_to_stg
+6.Rule3_temp_to_stg
 
 truncate table @DB_LEVEL@_edm_other_src_silver.pos_na_stg ;
 
 insert into @DB_LEVEL@_edm_other_src_silver.pos_na_stg
 select * from @DB_LEVEL@_edm_other_src_silver.pos_na_temp ;
 
-7. Rule4_stg_to_temp
+
+7.Rule4_stg_to_temp
 
 truncate table @DB_LEVEL@_edm_other_src_silver.pos_na_temp ;
 
@@ -2374,7 +2379,8 @@ soldtoservicesmajoracc,   --so-665 new attributes addition ends
 billtocustomersubclass, --so-728 new attributes addition starts
 endcustomersubclass,
 shiptocustomersubclass,
-soldtocustomersubclass  --so-728 new attributes addition ends
+soldtocustomersubclass,  --so-728 new attributes addition ends
+serialnumber
 )
 /*Below query picks those records which corresponds to more than 1 office ids, and splits such records to have a row corresponding to 3rd office id*/
 select
@@ -2635,7 +2641,8 @@ stg.soldtoservicesmajoracc as soldtoservicesmajoracc,   --so-665 new attributes 
 stg.billtocustomersubclass as billtocustomersubclass, --so-728 new attributes addition starts
 stg.endcustomersubclass as endcustomersubclass,
 stg.shiptocustomersubclass as shiptocustomersubclass,
-stg.soldtocustomersubclass as soldtocustomersubclass  --so-728 new attributes addition ends
+stg.soldtocustomersubclass as soldtocustomersubclass,  --so-728 new attributes addition ends
+stg.serialnumber as serialnumber
 
 from @DB_LEVEL@_edm_other_src_silver.pos_na_stg stg 
 -- left outer join 
@@ -2912,7 +2919,8 @@ stg.soldtoservicesmajoracc as soldtoservicesmajoracc,   --so-665 new attributes 
 stg.billtocustomersubclass as billtocustomersubclass, --so-728 new attributes addition starts
 stg.endcustomersubclass as endcustomersubclass,
 stg.shiptocustomersubclass as shiptocustomersubclass,
-stg.soldtocustomersubclass as soldtocustomersubclass  --so-728 new attributes addition ends
+stg.soldtocustomersubclass as soldtocustomersubclass,  --so-728 new attributes addition ends
+stg.serialnumber as serialnumber
 
 from @DB_LEVEL@_edm_other_src_silver.pos_na_stg stg
 -- left outer join 
@@ -3189,7 +3197,8 @@ stg.soldtoservicesmajoracc as soldtoservicesmajoracc,   --so-665 new attributes 
 stg.billtocustomersubclass as billtocustomersubclass, --so-728 new attributes addition starts
 stg.endcustomersubclass as endcustomersubclass,
 stg.shiptocustomersubclass as shiptocustomersubclass,
-stg.soldtocustomersubclass as soldtocustomersubclass  --so-728 new attributes addition ends
+stg.soldtocustomersubclass as soldtocustomersubclass,  --so-728 new attributes addition ends
+stg.serialnumber as serialnumber
 
 from @DB_LEVEL@_edm_other_src_silver.pos_na_stg stg 
 -- left outer join 
@@ -3467,7 +3476,8 @@ stg.soldtoservicesmajoracc as soldtoservicesmajoracc,   --so-665 new attributes 
 stg.billtocustomersubclass as billtocustomersubclass, --so-728 new attributes addition starts
 stg.endcustomersubclass as endcustomersubclass,
 stg.shiptocustomersubclass as shiptocustomersubclass,
-stg.soldtocustomersubclass as soldtocustomersubclass  --so-728 new attributes addition ends
+stg.soldtocustomersubclass as soldtocustomersubclass,  --so-728 new attributes addition ends
+stg.serialnumber as serialnumber
 
 from @DB_LEVEL@_edm_other_src_silver.pos_na_stg stg 
 -- left outer join 
@@ -3740,7 +3750,8 @@ stg.soldtoservicesmajoracc as soldtoservicesmajoracc,   --so-665 new attributes 
 stg.billtocustomersubclass as billtocustomersubclass, --so-728 new attributes addition starts
 stg.endcustomersubclass as endcustomersubclass,
 stg.shiptocustomersubclass as shiptocustomersubclass,
-stg.soldtocustomersubclass as soldtocustomersubclass  --so-728 new attributes addition ends
+stg.soldtocustomersubclass as soldtocustomersubclass,  --so-728 new attributes addition ends
+stg.serialnumber as serialnumber
 
 from @DB_LEVEL@_edm_other_src_silver.pos_na_stg stg 
 left outer join @DB_LEVEL@_edm_other_src_silver.americas_channel_commission_sp1_dop_claim sp1_v
@@ -3754,14 +3765,15 @@ on stg.SalesOfficeNumber=cast(sp1_v.office_id as string)
 where sp1_v.office_id is null 
 ;
 
-8. Rule4_temp_to_stg
+8.Rule4_temp_to_stg
 
 truncate table @DB_LEVEL@_edm_other_src_silver.pos_na_stg ;
 
 insert into @DB_LEVEL@_edm_other_src_silver.pos_na_stg
 select * from @DB_LEVEL@_edm_other_src_silver.pos_na_temp ;
 
-9. Rule5_stg_to_temp
+
+9.Rule5_stg_to_temp
 
 truncate table @DB_LEVEL@_edm_other_src_silver.pos_na_temp ;
 
@@ -4019,7 +4031,9 @@ soldtoservicesmajoracc,   --so-665 new attributes addition ends
 billtocustomersubclass, --so-728 new attributes addition starts
 endcustomersubclass,
 shiptocustomersubclass,
-soldtocustomersubclass  --so-728 new attributes addition ends
+soldtocustomersubclass,  --so-728 new attributes addition ends
+serialnumber
+
 )
 /*Below query picks those records which corresponds to more than 1 office ids, and splits such records to have a row corresponding to 3rd office id*/
 select
@@ -4279,7 +4293,9 @@ stg.soldtoservicesmajoracc as soldtoservicesmajoracc,   --so-665 new attributes 
 stg.billtocustomersubclass as billtocustomersubclass, --so-728 new attributes addition starts
 stg.endcustomersubclass as endcustomersubclass,
 stg.shiptocustomersubclass as shiptocustomersubclass,
-stg.soldtocustomersubclass as soldtocustomersubclass  --so-728 new attributes addition ends
+stg.soldtocustomersubclass as soldtocustomersubclass,  --so-728 new attributes addition ends
+stg.serialnumber as serialnumber
+
 
 from @DB_LEVEL@_edm_other_src_silver.pos_na_stg stg 
 -- left outer join 
@@ -4554,7 +4570,8 @@ stg.soldtoservicesmajoracc as soldtoservicesmajoracc,   --so-665 new attributes 
 stg.billtocustomersubclass as billtocustomersubclass, --so-728 new attributes addition starts
 stg.endcustomersubclass as endcustomersubclass,
 stg.shiptocustomersubclass as shiptocustomersubclass,
-stg.soldtocustomersubclass as soldtocustomersubclass  --so-728 new attributes addition ends
+stg.soldtocustomersubclass as soldtocustomersubclass,  --so-728 new attributes addition ends
+stg.serialnumber as serialnumber
 
  
 from @DB_LEVEL@_edm_other_src_silver.pos_na_stg stg 
@@ -4830,7 +4847,9 @@ stg.soldtoservicesmajoracc as soldtoservicesmajoracc,   --so-665 new attributes 
 stg.billtocustomersubclass as billtocustomersubclass, --so-728 new attributes addition starts
 stg.endcustomersubclass as endcustomersubclass,
 stg.shiptocustomersubclass as shiptocustomersubclass,
-stg.soldtocustomersubclass as soldtocustomersubclass  --so-728 new attributes addition ends
+stg.soldtocustomersubclass as soldtocustomersubclass,  --so-728 new attributes addition ends
+stg.serialnumber as serialnumber
+
 
 from @DB_LEVEL@_edm_other_src_silver.pos_na_stg stg 
 -- left outer join 
@@ -5105,7 +5124,8 @@ stg.soldtoservicesmajoracc as soldtoservicesmajoracc,   --so-665 new attributes 
 stg.billtocustomersubclass as billtocustomersubclass, --so-728 new attributes addition starts
 stg.endcustomersubclass as endcustomersubclass,
 stg.shiptocustomersubclass as shiptocustomersubclass,
-stg.soldtocustomersubclass as soldtocustomersubclass  --so-728 new attributes addition ends
+stg.soldtocustomersubclass as soldtocustomersubclass,  --so-728 new attributes addition ends
+stg.serialnumber as serialnumber
 
 from @DB_LEVEL@_edm_other_src_silver.pos_na_stg stg
 -- left outer join 
@@ -5376,7 +5396,8 @@ stg.soldtoservicesmajoracc as soldtoservicesmajoracc,   --so-665 new attributes 
 stg.billtocustomersubclass as billtocustomersubclass, --so-728 new attributes addition starts
 stg.endcustomersubclass as endcustomersubclass,
 stg.shiptocustomersubclass as shiptocustomersubclass,
-stg.soldtocustomersubclass as soldtocustomersubclass  --so-728 new attributes addition ends
+stg.soldtocustomersubclass as soldtocustomersubclass,  --so-728 new attributes addition ends
+stg.serialnumber as serialnumber
 
 from @DB_LEVEL@_edm_other_src_silver.pos_na_stg stg
 
@@ -5389,7 +5410,7 @@ on stg.SalesOfficeNumber=cast(sp2_v.office_id as string)
 where sp2_v.office_id is null
 ;
 
-10. Rule5a_temp_to_stg
+10.Rule5a_temp_to_stg
 
 truncate table @DB_LEVEL@_edm_other_src_silver.pos_na_stg ;
 
@@ -5647,7 +5668,8 @@ soldtoservicesmajoracc,   --so-665 new attributes addition ends
 billtocustomersubclass, --so-728 new attributes addition starts
 endcustomersubclass,
 shiptocustomersubclass,
-soldtocustomersubclass  --so-728 new attributes addition ends
+soldtocustomersubclass,  --so-728 new attributes addition ends
+serialnumber
 )
 
 select
@@ -5903,20 +5925,279 @@ temp.soldtoservicesmajoracc as soldtoservicesmajoracc,   --so-665 new attributes
 temp.billtocustomersubclass as billtocustomersubclass, --so-728 new attributes addition starts
 temp.endcustomersubclass as endcustomersubclass,
 temp.shiptocustomersubclass as shiptocustomersubclass,
-temp.soldtocustomersubclass as soldtocustomersubclass  --so-728 new attributes addition ends
+temp.soldtocustomersubclass as soldtocustomersubclass,  --so-728 new attributes addition ends
+temp.serialnumber as serialnumber
 
 from @DB_LEVEL@_edm_other_src_silver.pos_na_temp temp 
 left outer join @DB_LEVEL@_edm_other_src_silver.rep_office_info roi
 on temp.salesofficenumber =roi.office_location
 ;
 
-11. stg_to_pos_final
+
+11.stg_to_pos_final
 
 truncate table @DB_LEVEL@_na_cld_osc_gold.pos_na ;
-
 insert into @DB_LEVEL@_na_cld_osc_gold.pos_na
-select * from @DB_LEVEL@_edm_other_src_silver.pos_na_stg ;
+select 
+accountservicesales,
+accountsubtype,
+accounttype,
+activated,
+activedate,
+assignmentterritory,
+billtocustomeraddress,
+billtocustomercity,
+billtocustomercountry,
+billtocustomerenterpriseindustry,
+billtocustomergicsinudstrygroupdescription,
+billtocustomergicssectordescription,
+billtocustomergsc,
+billtocustomerid,
+billtocustomerindustry,
+billtocustomername,
+billtocustomernumber,
+billtocustomerparentaccount,
+billtocustomerparentname,
+billtocustomerpostalcode,
+billtocustomerreportingname,
+billtocustomerstandardizedname,
+billtocustomerstate,
+billtocustomersubvertical,
+billtocustomertype,
+billtocustomervertical,
+billtoenterpriseindustry,
+billtogsc_flag,
+billtoindustry,
+billtoindustrycode,
+billtononrevenueflag,
+billtoparentaccount,
+billtostandardizedname,
+cdwsalesarea,
+cdwsalesregion,
+cdwsalessegment,
+cloudlistprice,
+coe,
+country,
+crossrefwithlesnumber,
+currency,
+endcustomeraccountrole,
+endcustomeraddress,
+endcustomercity,
+endcustomercountry,
+endcustomercustomertype1,
+endcustomerenterpriseindustry,
+endcustomergscflag,
+endcustomerid,
+endcustomerindustry1,
+endcustomerindustrycode1,
+endcustomername,
+endcustomerparentaccount,
+endcustomerpostalcode,
+endcustomerstandardizedname,
+endcustomerstate,
+endcustomersubvertical,
+endcustomervertical,
+extendedlistprice,
+extendedstandardcost,
+gbu,
+hashedbilltocustomername,
+hashedendcustomername,
+hashedshiptocustomername,
+hashedsoldtocustomername,
+/* internalofficefamily, --SO 750 Changes
+internalofficename,
+internalofficenumber,
+internalofficeprincipalemail,
+internalofficeprincipalname,
+internalofficeregion,
+internalofficesplit,
+internalofficeterritory,
+internalofficetype,
+internalprincipalemail,
+internalprincipalname, */
+invoicedate,
+invoicelinenumber,
+invoicenumber,
+level6,
+listprice,
+lob,
+multiplier,
+namedaccountofficeassign,
+namedaccountsplit,
+netsalesrevenue,
+newlescrossref2,
+oemtag,
+officelocation,
+officetype,
+originalsplitpercent,
+posprojectregistrationnumber,
+possku,
+postalcodesofficeassign,
+productcategory,
+productfamily,
+producthierarchylevel1description,
+producthierarchylevel2description,
+producthierarchylevel3description,
+producthierarchylevel4code,
+producthierarchylevel4description,
+quantityshipped,
+recordid,
+recordsource,
+region,
+resellerbranchname,
+resellerbranchnumber,
+resellermajorcode,
+resellerminorcode,
+resellername,
+resellernumber,
+resellerpartnerlevel,
+resellerpartnertype,
+resellerregion,
+resellersalesofficename,
+resellersalesofficenumber,
+responseid,
+sales_area,
+salesofficefamily,
+salesofficename,
+salesofficenumber,
+salesofficenumber2,
+salesofficeprincipalemail,
+salesofficeprincipalname,
+salesofficeregion,
+salesofficeterritory,
+salesordernumber,
+salesoutprimarykey,
+salesregion,
+salesregion2,
+salesrepemail,
+salesrepid,
+salesrepname,
+segment,
+shiptocustomeraddress,
+shiptocustomercity,
+shiptocustomercountry,
+shiptocustomerenterpriseindustry,
+shiptocustomergsc,
+shiptocustomerid,
+shiptocustomerindustry1,
+shiptocustomername,
+shiptocustomernumber,
+shiptocustomerparentaccount,
+shiptocustomerparentname,
+shiptocustomerpostalcode,
+shiptocustomerstandardizedname,
+shiptocustomerstate,
+shiptocustomersubvertical,
+shiptocustomertype1,
+shiptocustomertype1_2,
+shiptocustomervertical,
+shiptoenterpriseindustry,
+shiptogsc_flag,
+shiptoindustry1,
+shiptoparentaccount,
+shiptostandardizedname,
+sizecategory,
+sku,
+skudescription,
+soldtocustomeraddress,
+soldtocustomercity,
+soldtocustomercountry,
+soldtocustomercustomergsc,
+soldtocustomercustomertype1,
+soldtocustomerindustry1,
+soldtocustomername,
+soldtocustomernumber,
+soldtocustomerparentaccount,
+soldtocustomerpostalcode,
+soldtocustomerstate,
+soldtocustomersubvertical,
+soldtocustomervertical,
+sp1productflag,
+sp1targetaccountflag,
+sp2productflag,
+sp2targetaccountflag,
+--speed_dial,-- SO 750 Changes
+splitpercent,
+standard_products,
+standardcost,
+transactionamount,
+transactiontype,
+yearmonth,
+intrachannelflag,
+w_insert_dtm,
+endcustomernumber,
+billtocustomerclasscode,
+endcustomerclasscode,
+shiptocustomerclasscode,
+soldtocustomerclasscode,
+billtocustomerpartnerclasscode,
+endcustomerpartnerclasscode,
+shiptocustomerpartnerclasscode,
+soldtocustomerpartnerclasscode,
+billtooracleregistryid, 
+endoracleregistryid,
+shiptooracleregistryid,
+soldtooracleregistryid,
+billtocustomerindustry1,
+billtocustomerindustry3,
+endcustomerindustry3,
+shiptocustomerindustry3,
+soldtocustomerindustry3,
+billtoreportingsubparent1,
+endreportingsubparent1,
+shiptoreportingsubparent1,
+soldtoreportingsubparent1,
+billtodefinitiveidnid,
+enddefinitiveidnid,
+shiptodefinitiveidnid,
+soldtodefinitiveidnid,
+billtodefinitiveidnidparentid,
+enddefinitiveidnidparentid,
+shiptodefinitiveidnidparentid,
+soldtodefinitiveidnidparentid,
+billtoncesleaid,
+endncesleaid,
+shiptoncesleaid,
+soldtoncesleaid,
+billtocustomerprovince,
+endcustomerprovince,
+shiptocustomerprovince,
+soldtocustomerprovince,
+billtooraclepartysitenumber,  
+endoraclepartysitenumber,
+shiptooraclepartysitenumber,
+soldtooraclepartysitenumber,
+billtodefinitiveid,
+enddefinitiveid,
+shiptodefinitiveid,
+soldtodefinitiveid,
+billtoncesschid,
+endncesschid,
+shiptoncesschid,
+soldtoncesschid,
+billtoaccounttype,
+endaccounttype,
+shiptoaccounttype,
+soldtoaccounttype,
+productcommissionclasscode,
+billtoservicesmajoracc,  
+endservicesmajoracc,
+shiptoservicesmajoracc,
+soldtoservicesmajoracc,   
+billtocustomersubclass, 
+endcustomersubclass,
+shiptocustomersubclass,
+soldtocustomersubclass,
+serialnumber 
+
+from @DB_LEVEL@_edm_other_src_silver.pos_na_stg ;
 
 truncate table @DB_LEVEL@_edm_other_src_silver.pos_na_temp ;
 truncate table @DB_LEVEL@_edm_other_src_silver.pos_na_stg ;
+
+
+
+
+
+
 

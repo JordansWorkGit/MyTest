@@ -1,5 +1,4 @@
 
-drop view if exists prod_na_cld_osc_gold.Sales_Out_NA_without_Comm_split_vw ;
 create View prod_na_cld_osc_gold.Sales_Out_NA_without_Comm_split_vw as
 
 select 
@@ -101,38 +100,12 @@ select
 ,'' geistcustomernumber
 ,'' geistproductclass
 ,growth_target
-,'' internalofficefamily
-,'' internalofficename
-,'' internalofficenumber
-,'' internalofficeprincipalemail
-,'' internalofficeprincipalname
-,'' internalofficeregion
-,'' internalofficesplit
-,'' internalofficeterritory
-,'' internalofficetype
-,'' internalprincipalemail
-,'' internalprincipalname
-,'' internalsalesrepid
 ,invoicedate
 ,invoicelinenumber
 ,invoicenumber
 ,'' legacy
 ,legacysizecategory
-,'' lesbilltoaltindustrycode
-,lesbilltomajorclass
-,lesbilltominorclass
-,'' lesbilltostandardindustrycode
 ,alicecommissionoverridepercent
-,'' lescustomerindustrycodelevel1
-,'' lescustomerindustrycodelevel2
-,'' lescustomerindustrycodelevel3
-,'' lesdb2grouping
-,'' lesorderprefix
-,'' lespointofcalculation
-,'' lesproductdivisioncode
-,'' lessalesclass
-,'' lesshipmentnumber
-,lesunitsflag
 ,level_6 as level6
 ,listprice
 ,'' listpricemondayticket
@@ -283,28 +256,8 @@ select
 ,skudescription
 ,'' skumondayticket
 ,'' skutrimmed
-,'' sms_contract
-,smsbatteriesonlyflag
-,smsbatteryrbsm
-,'' smscallcode
-,smscontractenddate
-,smscontractexpiredate
-,'' smscontractmonths
-,smscontractpms
-,smscontractsequence
-,smscontractstartdate
-,smscontractstatus
-,'' smscoverageclass
 ,smscustomertype
-,smsequipmentsegment
 ,'' smsequipmentsequence
-,'' smsequipmentsubtype
-,'' smsequipmenttype
-,smssiteid
-,smstagnumber
-,'' smsticketcode
-,smsticketnumber
-,'' smstickettype
 ,'' soldtocustomeraddress
 ,'' soldtocustomercity
 ,'' soldtocustomercountry
@@ -324,7 +277,6 @@ select
 ,'' sp2productexclusion
 ,'' sp2productflag
 ,sourceorder
-,speed_dial
 ,'' speed_dial2
 ,'' splitpercent
 ,'' standard_products
@@ -412,6 +364,8 @@ select
 ,endcustomersubclass
 ,shiptocustomersubclass
 ,soldtocustomersubclass
+,aop_customer_sub_class
+,'' serialnumber
 
 from 
 prod_na_cld_osc_gold.sales_exploration_data_na_bkp sed 
@@ -531,38 +485,12 @@ select
 ,geistcustomernumber
 ,geistproductclass
 ,growth_target
-,internalofficefamily
-,internalofficename
-,internalofficenumber
-,internalofficeprincipalemail
-,internalofficeprincipalname
-,internalofficeregion
-,internalofficesplit
-,internalofficeterritory
-,internalofficetype
-,internalprincipalemail
-,internalprincipalname
-,internalsalesrepid
 ,invoicedate
 ,invoicelinenumber
 ,invoicenumber
 ,legacy
 ,legacysizecategory
-,lesbilltoaltindustrycode
-,lesbilltomajorclass
-,lesbilltominorclass
-,lesbilltostandardindustrycode
 ,alicecommissionoverridepercent
-,lescustomerindustrycodelevel1
-,lescustomerindustrycodelevel2
-,lescustomerindustrycodelevel3
-,lesdb2grouping
-,lesorderprefix
-,lespointofcalculation
-,lesproductdivisioncode
-,lessalesclass
-,lesshipmentnumber
-,lesunitsflag
 ,level6
 ,listprice
 ,listpricemondayticket
@@ -713,28 +641,8 @@ select
 ,skudescription
 ,skumondayticket
 ,skutrimmed
-,sms_contract
-,smsbatteriesonlyflag
-,smsbatteryrbsm
-,smscallcode
-,smscontractenddate
-,smscontractexpiredate
-,smscontractmonths
-,smscontractpms
-,smscontractsequence
-,smscontractstartdate
-,smscontractstatus
-,smscoverageclass
 ,smscustomertype
-,smsequipmentsegment
 ,smsequipmentsequence
-,smsequipmentsubtype
-,smsequipmenttype
-,smssiteid
-,smstagnumber
-,smsticketcode
-,smsticketnumber
-,smstickettype
 ,soldtocustomeraddress
 ,soldtocustomercity
 ,soldtocustomercountry
@@ -754,7 +662,6 @@ select
 ,sp2productexclusion
 ,sp2productflag
 ,sourceorder
-,speed_dial
 ,speed_dial2
 ,splitpercent
 ,standard_products
@@ -842,6 +749,8 @@ select
 ,endcustomersubclass
 ,shiptocustomersubclass
 ,soldtocustomersubclass
+,aop_customer_sub_class
+,serialnumber
 
 from (
   SELECT
@@ -1141,38 +1050,12 @@ from (select
 ,ps.gbu
 ,'' geistcustomernumber
 ,'' geistproductclass
-,ps.internalofficefamily
-,ps.internalofficename
-,ps.internalofficenumber
-,ps.internalofficeprincipalemail
-,ps.internalofficeprincipalname
-,ps.internalofficeregion
-,ps.internalofficesplit
-,ps.internalofficeterritory
-,ps.internalofficetype
-,ps.internalprincipalemail
-,ps.internalprincipalname
-,'' internalsalesrepid
 ,ps.invoicedate
 ,ps.invoicelinenumber
 ,ps.invoicenumber
 ,'' legacy
 ,'' legacysizecategory
-,'' lesbilltoaltindustrycode
-,'' lesbilltomajorclass
-,'' lesbilltominorclass
-,'' lesbilltostandardindustrycode
 ,'' alicecommissionoverridepercent
-,'' lescustomerindustrycodelevel1
-,'' lescustomerindustrycodelevel2
-,'' lescustomerindustrycodelevel3
-,'' lesdb2grouping
-,'' lesorderprefix
-,'' lespointofcalculation
-,'' lesproductdivisioncode
-,'' lessalesclass
-,'' lesshipmentnumber
-,'' lesunitsflag
 ,ps.level6
 ,ps.listprice
 ,'' listpricemondayticket
@@ -1319,28 +1202,8 @@ from (select
 ,ps.skudescription
 ,'' skumondayticket
 ,'' skutrimmed
-,'' sms_contract
-,'' smsbatteriesonlyflag
-,'' smsbatteryrbsm
-,'' smscallcode
-,'' smscontractenddate
-,'' smscontractexpiredate
-,'' smscontractmonths
-,'' smscontractpms
-,'' smscontractsequence
-,'' smscontractstartdate
-,'' smscontractstatus
-,'' smscoverageclass
 ,'' smscustomertype
-,'' smsequipmentsegment
 ,'' smsequipmentsequence
-,'' smsequipmentsubtype
-,'' smsequipmenttype
-,'' smssiteid
-,'' smstagnumber
-,'' smsticketcode
-,'' smsticketnumber
-,'' smstickettype
 ,'' soldtocustomeraddress
 ,ps.soldtocustomercity
 ,ps.soldtocustomercountry
@@ -1360,7 +1223,6 @@ from (select
 ,'' sp2productexclusion
 ,ps.sp2productflag
 ,'' sourceorder
-,ps.speed_dial
 ,'' speed_dial2
 ,ps.splitpercent
 ,ps.standard_products
@@ -1455,7 +1317,9 @@ ps.soldtoservicesmajoracc,
 ps.billtocustomersubclass,
 ps.endcustomersubclass,
 ps.shiptocustomersubclass,
-ps.soldtocustomersubclass	
+ps.soldtocustomersubclass,
+'' aop_customer_sub_class,
+ps.serialnumber
 
 from (select * from prod_na_cld_osc_gold.pos_na where intrachannelflag<> 'YES') ps
 left outer join prod_edm_other_src_silver.ref_sellingmotion_accounts sa

@@ -1,5 +1,7 @@
 1.INVALIDATE_METADATA
 
+--RELEASE DATE : 06/09/2022
+
 invalidate metadata @DB_LEVEL@_na_cld_osc_gold.sales_exploration_data_na_temp; 
 invalidate metadata @DB_LEVEL@_edm_gold.f_sales_order_line;
 invalidate metadata @DB_LEVEL@_edm_gold.f_sales_invoice_line;
@@ -68,6 +70,7 @@ invalidate metadata @DB_LEVEL@_GEIST_SILVER.GEIST_CURRENCY;
 invalidate metadata @DB_LEVEL@_GEIST_SILVER.GEIST_G_ARINVT_TECH_INFO;
 invalidate metadata @DB_LEVEL@_GEIST_SILVER.GEIST_SALESPEOPLE;
 invalidate metadata @DB_LEVEL@_GEIST_SILVER.GEIST_EPLANT;
+
 
 2.sales_exploration_data_na_temp
 
@@ -384,10 +387,7 @@ SELECT Distinct
 	InvoiceLineNumber,
 	InvoiceNumber,
 	LegacySizeCategory,
-	LESBillToMajorClass,
-	LESBillToMinorClass,
 	alicecommissionoverridepercent,
-	LESUnitsFlag,
 	upper(Level_6),
 	ListPrice,
 	upper(LOB),
@@ -483,19 +483,7 @@ SELECT Distinct
 	sizecategory,
 	upper(SKU_rollup),
 	upper(SKUDescription),
-	SMSBatteriesOnlyFlag,
-	SMSBatteryRBSM,
-	SMSContractEndDate,
-	SMSContractExpireDate,
-	SMSContractPMs,
-	SMSContractSequence,
-	SMSContractStartDate,
-	SMSContractStatus,
 	SMSCustomerType,
-	SMSEquipmentSegment,
-	SMSSiteId,
-	SMSTagNumber,
-	SMSTicketNumber,
 	upper(SoldToCustomerCustomerType1),
 	upper(SoldToCustomerEnterpriseIndustry),
 	upper(SoldToCustomerGSC),
@@ -505,7 +493,6 @@ SELECT Distinct
 	upper(SoldToCustomerStandardizedName),
 	upper(SoldToCustomerVertical),
 	SourceOrder,
-	SPEED_DIAL,
 	YearMonth,
     effective_user() as w_insert_by ,
     now() as w_insert_dtm ,
@@ -817,7 +804,7 @@ END AS sizecategory,
 	    WHEN aop_account_name = 'DELL' THEN 'NULL'
 		WHEN nvl(dc_h.customer_sub_class, 'N') != 'N' THEN dc_h.customer_sub_class
 		WHEN nvl(b.sm_sku, 'N') != 'N'  THEN 'OEM'
-		ELSE 'NULL'
+		--ELSE 'NULL'
 	END aop_customer_sub_class
 	
 from (SELECT
@@ -1141,10 +1128,7 @@ from (SELECT
 			inv.invoice_line_num InvoiceLineNumber,
 			inv.invoice_num InvoiceNumber,
 			'' LegacySizeCategory,
-			'' LESBillToMajorClass,
-			'' LESBillToMinorClass,
 			'' alicecommissionoverridepercent,
-			'' LESUnitsFlag,
 			--cat.catalog_lvl_desc_6 Level_6,
 			/*case when NVL(inv.product_num,pm.projectcode) = sku_lu.sku and inv.src_system_name = sku_lu.recordsource then sku_lu.level6
 			else cat.catalog_lvl_desc_6 
@@ -1299,19 +1283,7 @@ from (SELECT
 			case when NVL(inv.product_num,pm.projectcode) = sku_lu.sku and inv.src_system_name = sku_lu.recordsource then sku_lu.skudescription
 			else prod.product_desc
 			end SKUDescription,
-			'' SMSBatteriesOnlyFlag,
-			'' SMSBatteryRBSM,
-			'' SMSContractEndDate,
-			'' SMSContractExpireDate,
-			'' SMSContractPMs,
-			'' SMSContractSequence,
-			'' SMSContractStartDate,
-			'' SMSContractStatus,
 			trim(sms.sms_customer_type) SMSCustomerType,
-			'' SMSEquipmentSegment,
-			'' SMSSiteId,
-			'' SMSTagNumber,
-			'' SMSTicketNumber,
 			'' SoldToCustomerCustomerType1,
 			'' SoldToCustomerEnterpriseIndustry,
 			'' SoldToCustomerGSC,
@@ -1336,7 +1308,6 @@ from (SELECT
 			--nvl(sold_acc.market_sub_vertical_txt,'NULL') SoldToCustomerVertical,
 			nvl(sold_acc.market_vertical_txt,'NULL') SoldToCustomerVertical,--mapping for SoldToCustomerVertical changed so-621
 			'' SourceOrder,
-			'' SPEED_DIAL,
 			invoiced_on_dt YearMonth,
 			shipd.SUM_FROZEN standard_cost,
 			end_ref.customer end_customer,
@@ -2138,7 +2109,8 @@ LEFT OUTER JOIN
 		) sn on a.salesordernumber = sn.salesordernumber and a.orderexlinenumber = sn.orderexlinenumber and a.lob = sn.lob and a.gbu = sn.gbu 
 	
 ) b 
-		left outer join (select distinct customer_sub_class,customer_name_txt from @DB_LEVEL@_mdm_hub_gold.d_customer_header) dc_h on
+		left outer join (select distinct customer_sub_class,customer_name_txt from @DB_LEVEL@_mdm_hub_gold.d_customer_header
+		where customer_class_code_txt = 'GLOBAL STRATEGIC ACCOUNT') dc_h on
 			  upper(aop_account_name) = upper(dc_h.customer_name_txt)
 )dt )tt )st)s1
 left outer join
@@ -2236,10 +2208,7 @@ SELECT
 	InvoiceLineNumber,
 	InvoiceNumber,
 	LegacySizeCategory,
-	LESBillToMajorClass,
-	LESBillToMinorClass,
 	alicecommissionoverridepercent,
-	LESUnitsFlag,
 	Level_6,
 	ListPrice,
 	LOB,
@@ -2329,19 +2298,7 @@ SELECT
 	sizecategory,
 	SKU,
 	SKUDescription,
-	SMSBatteriesOnlyFlag,
-	SMSBatteryRBSM,
-	SMSContractEndDate,
-	SMSContractExpireDate,
-	SMSContractPMs,
-	SMSContractSequence,
-	SMSContractStartDate,
-	SMSContractStatus,
 	SMSCustomerType,
-	SMSEquipmentSegment,
-	SMSSiteId,
-	SMSTagNumber,
-	SMSTicketNumber,
 	SoldToCustomerCustomerType1,
 	SoldToCustomerEnterpriseIndustry,
 	SoldToCustomerGSC,
@@ -2351,7 +2308,6 @@ SELECT
 	SoldToCustomerStandardizedName,
 	SoldToCustomerVertical,
 	SourceOrder,
-	SPEED_DIAL,
 	YearMonth,
     effective_user() as w_insert_by ,
     now() as w_insert_dtm ,
@@ -2529,7 +2485,7 @@ trim(upper(b.country)) BillToCustomerCountry,
 '' BillToCustomerIndustry1,
 upper(b.attn) BillToCustomerName,
 trim(upper(c.custno)) BillToCustomerNumber,
-'' BillToCustomerParentAccount,
+dch_v.ultimate_parent_txt BillToCustomerParentAccount,
 '' BillToCustomerParentName,
 trim(upper(b.zip)) BillToCustomerPostalCode,
 upper(b.attn) BillToCustomerStandardizedName,
@@ -2582,7 +2538,7 @@ trim(upper(s.country)) EndCustomerCountry,
 upper(s.attn) EndCustomerName,
 '' EndCustomerName2,
 trim(upper(c.custno)) EndCustomerNumber,
-'' EndCustomerParentAccount,
+dch_v.ultimate_parent_txt EndCustomerParentAccount,
 '' EndCustomerParentName,
 trim(upper(s.zip)) EndCustomerPostalCode,
 '' EndCustomerStandardizedName,
@@ -2602,10 +2558,7 @@ a.invoice_date InvoiceDate,
 '' InvoiceLineNumber,
 a.invoice_no InvoiceNumber,
 '' LegacySizeCategory,
-'' LESBillToMajorClass,
-'' LESBillToMinorClass,
 '' alicecommissionoverridepercent,
-'' LESUnitsFlag,
 upper(catl.catalog_lvl_desc_6) Level_6,
 nvl(i.nuser4,0) ListPrice,
 --'RACK PDU' as LOB,
@@ -2722,19 +2675,7 @@ upper(s.state) ShipToCustomerState,
 --upper(Decode(od.lot_charge_arinvt_id,null,ad.ARINVT_ITEMNO,i.itemno)) SKU,
 upper(trim(Decode(od.lot_charge_arinvt_id,null,ad.ARINVT_ITEMNO,i.itemno))) SKU,
  upper(i.DESCRIP)  SKUDescription,
-'' SMSBatteriesOnlyFlag,
-'' SMSBatteryRBSM,
-'' SMSContractEndDate,
-'' SMSContractExpireDate,
-'' SMSContractPMs,
-'' SMSContractSequence,
-'' SMSContractStartDate,
-'' SMSContractStatus,
 '' SMSCustomerType,
-'' SMSEquipmentSegment,
-'' SMSSiteId,
-'' SMSTagNumber,
-'' SMSTicketNumber,
 '' SoldToCustomerCustomerType1,
 '' SoldToCustomerEnterpriseIndustry,
 '' SoldToCustomerGSC,
@@ -2744,7 +2685,6 @@ upper(trim(Decode(od.lot_charge_arinvt_id,null,ad.ARINVT_ITEMNO,i.itemno))) SKU,
 '' SoldToCustomerStandardizedName,
 '' SoldToCustomerVertical,
 '' SourceOrder,
-'' SPEED_DIAL,
 cast('' as timestamp) YearMonth,
 effective_user() as w_insert_by ,
 now() as w_insert_dtm ,
@@ -2939,7 +2879,6 @@ LEFT OUTER JOIN @DB_LEVEL@_GEIST_SILVER.GEIST_ARINVOICE A ON AD.ARINVOICE_ID = A
 	) Gt )s1 )s2 )s3;
 
 compute stats @DB_LEVEL@_na_cld_osc_gold.sales_exploration_data_na;
-
 
 4.new_commissions_split_logic
 
@@ -3588,10 +3527,7 @@ SELECT	a.account_type ,
 		a.invoicelinenumber ,
 		a.invoicenumber ,
 		a.legacysizecategory ,
-		a.lesbilltomajorclass ,
-		a.lesbilltominorclass ,
 		cast(b.split_percent as STRING) AS alicecommissionoverridepercent ,
-		a.lesunitsflag ,
 		a.level_6 ,
 		CASE
 			WHEN a.listprice<>0
@@ -3700,19 +3636,7 @@ SELECT	a.account_type ,
 		a.sizecategory ,
 		a.sku ,
 		a.skudescription ,
-		a.smsbatteriesonlyflag ,
-		a.smsbatteryrbsm ,
-		a.smscontractenddate ,
-		a.smscontractexpiredate ,
-		a.smscontractpms ,
-		a.smscontractsequence ,
-		a.smscontractstartdate ,
-		a.smscontractstatus ,
 		a.smscustomertype ,
-		a.smsequipmentsegment ,
-		a.smssiteid ,
-		a.smstagnumber ,
-		a.smsticketnumber ,
 		a.soldtocustomercustomertype1 ,
 		a.soldtocustomerenterpriseindustry ,
 		a.soldtocustomergsc ,
@@ -3722,7 +3646,6 @@ SELECT	a.account_type ,
 		a.soldtocustomerstandardizedname ,
 		a.soldtocustomervertical ,
 		a.sourceorder ,
-		a.speed_dial ,
 		a.yearmonth ,
 		a.w_insert_by ,
 		a.w_insert_dtm ,
@@ -3831,4 +3754,4 @@ and a.recordsource = b.recordsource
 
 
 
-----New commissions logic code ends here 		
+----New commissions logic code ends here 

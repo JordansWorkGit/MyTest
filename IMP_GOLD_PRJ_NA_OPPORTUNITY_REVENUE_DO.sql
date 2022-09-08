@@ -1,5 +1,7 @@
 1.Invalidate_metadata
 
+--RELEASE DATE : 06/09/2022
+
 invalidate metadata @DB_LEVEL@_na_cld_osc_gold.opportunity_revenue_na;
 invalidate metadata @DB_LEVEL@_edm_gold.f_opportunity;
 invalidate metadata @DB_LEVEL@_edm_gold.f_opportunity_extn;
@@ -481,7 +483,7 @@ FROM
 	    WHEN aop_account_name = 'DELL' THEN 'NULL'
 		WHEN nvl(dc_h.customer_sub_class, 'N') != 'N' THEN dc_h.customer_sub_class
 		WHEN nvl(X.sm_sku, 'N') != 'N'  THEN 'OEM'
-		ELSE 'NULL'
+		--ELSE 'NULL'
 	END aop_customer_sub_class
 	FROM
 		(
@@ -504,11 +506,11 @@ FROM
 			upper(b.account_type) EndCustomerCustomerType1,
 			--mdm.industry EndCustomerIndustry1,
 			--upper(nvl(coalesce(bill_acc.industry_classification_1_txt, bill_acc.industry_classification_2_txt, bill_acc.industry_classification_3_txt),mdm.industry)) EndCustomerIndustry1,
-			upper(nvl(coalesce(bill_acc.industry_classification_1_txt, bill_acc.industry_classification_2_txt),mdm.industry)) EndCustomerIndustry1,--mapping changed for EndCustomerIndustry1
+			upper(nvl(coalesce(end_acc.industry_classification_1_txt, end_acc.industry_classification_2_txt),end_mdm.industry)) EndCustomerIndustry1,--mapping changed for EndCustomerIndustry1
 			--mdm.parentaccount EndCustomerParentAccount,
-			upper(nvl(bill_acc.ultimate_parent_txt,mdm.parentaccount)) EndCustomerParentAccount,
-			upper(mdm.standardizedname) EndCustomerStandardizedName,
-			upper(mdm.customername) EndUserAccount,
+			upper(nvl(end_acc.ultimate_parent_txt,end_mdm.parentaccount)) EndCustomerParentAccount,
+			upper(end_mdm.standardizedname) EndCustomerStandardizedName,
+			upper(end_mdm.customername) EndUserAccount,
 			'' ExpClsDt3mFlag,
 			'' ExpClsDt6mFlag,
 			--nvl(upper(gph.Catalog_lvl_desc_1),gph_sku.gbu) GBU,
@@ -642,77 +644,77 @@ FROM
             a.oppty_line_num oppty_line_num,	--VR 05052022 SO-653 line number addition 		
 			 --SO-621 new fields addition starts
 			bill_acc.customer_name_txt BillToCustomerName,
-			bill_acc.customer_name_txt EndCustomerName,
+			end_acc.customer_name_txt EndCustomerName,
 			bill_acc.customer_name_txt ShipToCustomerName,
 			bill_acc.customer_name_txt SoldToCustomerName,
-			bill_acc.ultimate_parent_txt BillToCustomerParentAccount,
-			bill_acc.ultimate_parent_txt  ShipToCustomerParentAccount,
-			bill_acc.ultimate_parent_txt  SoldToCustomerParentAccount,
+			nvl(bill_acc.ultimate_parent_txt,mdm.parentaccount) BillToCustomerParentAccount,
+			nvl(bill_acc.ultimate_parent_txt,mdm.parentaccount) ShipToCustomerParentAccount,
+			nvl(bill_acc.ultimate_parent_txt,mdm.parentaccount)  SoldToCustomerParentAccount,
 			bill_acc.customer_class_code_txt BillToCustomerClassCode,
-			bill_acc.customer_class_code_txt EndCustomerClassCode,
+			end_acc.customer_class_code_txt EndCustomerClassCode,
 			bill_acc.customer_class_code_txt ShipToCustomerClassCode,
 			bill_acc.customer_class_code_txt SoldToCustomerClassCode,
 			bill_acc.partner_class_code_txt BillToCustomerPartnerClassCode,
-			bill_acc.partner_class_code_txt EndCustomerPartnerClassCode,
+			end_acc.partner_class_code_txt EndCustomerPartnerClassCode,
 			bill_acc.partner_class_code_txt ShipToCustomerPartnerClassCode,
 			bill_acc.partner_class_code_txt SoldToCustomerPartnerClassCode,
 			bill_acc.oracle_cloud_registry_id BillToOracleRegistryID, 
-			bill_acc.oracle_cloud_registry_id EndOracleRegistryID,
+			end_acc.oracle_cloud_registry_id EndOracleRegistryID,
 			bill_acc.oracle_cloud_registry_id ShipToOracleRegistryID,
 			bill_acc.oracle_cloud_registry_id SoldToOracleRegistryID,
 			upper(nvl(coalesce(bill_acc.industry_classification_1_txt, bill_acc.industry_classification_2_txt),mdm.industry)) BilltoToCustomerIndustry1,
 			upper(nvl(coalesce(bill_acc.industry_classification_1_txt, bill_acc.industry_classification_2_txt),mdm.industry)) ShipToCustomerIndustry1,
 			upper(nvl(coalesce(bill_acc.industry_classification_1_txt, bill_acc.industry_classification_2_txt),mdm.industry)) SoldToCustomerIndustry1,
 			bill_acc.industry_classification_3_txt BillToCustomerIndustry3,
-			bill_acc.industry_classification_3_txt EndCustomerIndustry3,
+			end_acc.industry_classification_3_txt EndCustomerIndustry3,
 			bill_acc.industry_classification_3_txt ShipToCustomerIndustry3,
 			bill_acc.industry_classification_3_txt SoldToCustomerIndustry3,
 			bill_acc.market_vertical_txt BillToCustomerVertical,
-	        bill_acc.market_vertical_txt EndCustomerVertical,
+	        end_acc.market_vertical_txt EndCustomerVertical,
 	        bill_acc.market_vertical_txt ShipToCustomerVertical,
 			bill_acc.market_vertical_txt SoldToCustomerVertical,
 			bill_acc.market_sub_vertical_txt BillToCustomerSubVertical,
-	        bill_acc.market_sub_vertical_txt EndCustomerSubVertical,
+	        end_acc.market_sub_vertical_txt EndCustomerSubVertical,
 	        bill_acc.market_sub_vertical_txt ShipToCustomerSubVertical,
 			bill_acc.market_sub_vertical_txt SoldToCustomerSubVertical,
 			bill_acc.reporting_sub_parent1 BillToReportingSubParent1,
-			bill_acc.reporting_sub_parent1 EndReportingSubParent1,
+			end_acc.reporting_sub_parent1 EndReportingSubParent1,
 			bill_acc.reporting_sub_parent1 ShipToReportingSubParent1,
 			bill_acc.reporting_sub_parent1 SoldToReportingSubParent1,
 			bill_acc.definitive_idn_id BillToDefinitiveIDNID,
-			bill_acc.definitive_idn_id EndDefinitiveIDNID,
+			end_acc.definitive_idn_id EndDefinitiveIDNID,
 			bill_acc.definitive_idn_id ShipToDefinitiveIDNID,
 			bill_acc.definitive_idn_id SoldToDefinitiveIDNID,
 			bill_acc.definitive_idn_parentid BillToDefinitiveIDNIDParentID,
-			bill_acc.definitive_idn_parentid EndDefinitiveIDNIDParentID,
+			end_acc.definitive_idn_parentid EndDefinitiveIDNIDParentID,
 			bill_acc.definitive_idn_parentid ShipToDefinitiveIDNIDParentID,
 			bill_acc.definitive_idn_parentid SoldToDefinitiveIDNIDParentID,
 			bill_acc.nces_leaid BillToNCESLEAID,
-			bill_acc.nces_leaid EndNCESLEAID,
+			end_acc.nces_leaid EndNCESLEAID,
 			bill_acc.nces_leaid ShipToNCESLEAID,
 			bill_acc.nces_leaid SoldToNCESLEAID,
 			bill_acc.address1_primary_txt BillToCustomerAddress,
-			bill_acc.address1_primary_txt EndCustomerAddress,
+			end_acc.address1_primary_txt EndCustomerAddress,
 			bill_acc.address1_primary_txt ShipToCustomerAddress,
 			bill_acc.address1_primary_txt SoldToCustomerAddress,
 			bill_acc.city_primary_txt BillToCustomerCity,
-			bill_acc.city_primary_txt EndCustomerCity,
+			end_acc.city_primary_txt EndCustomerCity,
 			bill_acc.city_primary_txt ShipToCustomerCity,
 			bill_acc.city_primary_txt SoldToCustomerCity,
 			bill_acc.state_primary_cd BillToCustomerState,
-			bill_acc.state_primary_cd EndCustomerState,
+			end_acc.state_primary_cd EndCustomerState,
 			bill_acc.state_primary_cd ShipToCustomerState,
 			bill_acc.state_primary_cd SoldToCustomerState,
 			bill_acc.province_primary_txt BillToCustomerProvince,
-			bill_acc.province_primary_txt EndCustomerProvince,
+			end_acc.province_primary_txt EndCustomerProvince,
 			bill_acc.province_primary_txt ShipToCustomerProvince,
 			bill_acc.province_primary_txt SoldToCustomerProvince,
 			bill_acc.country_primary_cd BillToCustomerCountry,
-			bill_acc.country_primary_cd EndCustomerCountry,
+			end_acc.country_primary_cd EndCustomerCountry,
 			bill_acc.country_primary_cd ShipToCustomerCountry,
 			bill_acc.country_primary_cd SoldToCustomerCountry,
 			bill_acc.postal_code_primary_txt BillToCustomerPostalCode,
-			bill_acc.postal_code_primary_txt EndCustomerPostalCode,
+			end_acc.postal_code_primary_txt EndCustomerPostalCode,
 			bill_acc.postal_code_primary_txt ShipToCustomerPostalCode,
 			bill_acc.postal_code_primary_txt SoldToCustomerPostalCode,
 			'' BillToOraclePartySiteNumber,  
@@ -720,11 +722,11 @@ FROM
 			'' ShipToOraclePartySiteNumber,
 			'' SoldToOraclePartySiteNumber,
 			bill_acc.definitive_id BillToDefinitiveID,
-			bill_acc.definitive_id EndDefinitiveID,
+			end_acc.definitive_id EndDefinitiveID,
 			bill_acc.definitive_id ShipToDefinitiveID,
 			bill_acc.definitive_id SoldToDefinitiveID,
 			bill_acc.nces_schid BillToNCESSCHID,
-			bill_acc.nces_schid EndNCESSCHID,
+			end_acc.nces_schid EndNCESSCHID,
 			bill_acc.nces_schid ShipToNCESSCHID,
 			bill_acc.nces_schid SoldToNCESSCHID,
 			--SO-621 new fields addition ends
@@ -732,7 +734,7 @@ FROM
 			case when bill_acc.buying_customer_flg = 'Y' then bill_acc.customer_type_txt 
 			else ''
 			END BillToAccountType,
-			case when bill_acc.buying_customer_flg = 'Y' then bill_acc.customer_type_txt 
+			case when end_acc.buying_customer_flg = 'Y' then end_acc.customer_type_txt 
 			else ''
 			END EndAccountType,
 			case when bill_acc.buying_customer_flg = 'Y' then bill_acc.customer_type_txt 
@@ -742,7 +744,7 @@ FROM
 			else ''
 			END SoldToAccountType,--SO-661 new attributes addition ends here	
 			bill_acc.services_major_acc BillToServicesMajorAcc, --SO-665 new attributes addition starts
-			bill_acc.services_major_acc EndServicesMajorAcc,
+			end_acc.services_major_acc EndServicesMajorAcc,
 			bill_acc.services_major_acc ShipToServicesMajorAcc,
 			bill_acc.services_major_acc SoldToServicesMajorAcc, --SO-665 new attributes addition ends
 			so.attribute_char1 as OEM_FLAG,
@@ -755,7 +757,7 @@ FROM
 				ELSE 'Non Account'
 			END aop_account_name,			
 			bill_acc.customer_sub_class BillToCustomerSubClass,  --so-728 new attributes addition starts
-			bill_acc.customer_sub_class EndCustomerSubClass,
+			end_acc.customer_sub_class EndCustomerSubClass,
 			bill_acc.customer_sub_class ShipToCustomerSubClass,
 			bill_acc.customer_sub_class SoldToCustomerSubClass, --so-728 new attributes addition ends 
 			a.product_num Product_Number, --SO-739 new attributes addition 
@@ -923,6 +925,28 @@ FROM
 			WHERE
 				p.rno = 1) mdm ON
 			mdm.customerid = b.account
+		LEFT OUTER JOIN (
+			SELECT
+				*
+			FROM
+				(
+				SELECT
+					customerid,
+					customername,
+					parentaccount,
+					industry,
+					standardizedname,
+					row_number() OVER (PARTITION BY customerid
+				ORDER BY
+					to_timestamp(date_of_change,
+					'dd-MM-yyyy') DESC) rno
+				FROM
+					@DB_LEVEL@_edm_other_src_silver.customer_data db
+				WHERE
+					db.recordsource = 'SalesCloud') p
+			WHERE
+				p.rno = 1) end_mdm ON
+			end_mdm.customerid = upper(a.end_user_account_name)   --new join for endcustomer data
 			
 						/*
 			left outer join  @DB_LEVEL@_mdm_hub_gold.d_customer_header_v bill_acc
@@ -941,6 +965,19 @@ FROM
             ) bill_acc
             on cast(bill_acc.oracle_cloud_party_id as string) = a.customer_account_num
 			-- new hub changes for so-621 END
+			
+			LEFT OUTER JOIN
+			
+			(SELECT DISTINCT
+            xref.oracle_cloud_party_id,xref.oracle_cloud_registry_id,da.definitive_id,da.nces_schid,
+            dh.*
+            FROM @DB_LEVEL@_mdm_hub_gold.d_customer_header dh
+            left outer JOIN @DB_LEVEL@_mdm_hub_gold.d_customer_address da ON dh.mdm_hdr_id=da.mdm_hdr_id and dh.postal_code_primary_txt=da.site_postal_code_txt
+            and dh.address1_primary_txt = da.site_address1_txt
+            left outer JOIN @DB_LEVEL@_mdm_hub_gold.d_customer_xref xref ON cast(dh.mdm_hdr_id as string) = xref.mdm_hdr_id
+            and xref.source_system='ORACLE'
+            ) end_acc
+            on cast(end_acc.oracle_cloud_party_id as double) = op.end_user_account_id	
 			
 			left outer join  @DB_LEVEL@_edm_gold.d_legacy_customer_account bill_acc_leg
 			on a.legacy_customer_account_id = bill_acc_leg.Integration_id
@@ -1039,6 +1076,7 @@ bill_acc_leg.account_num = h.Business_Nbr
 			'Vertiv Canada',
 			'Vertiv - LATAM')
 			) x 
-	left outer join (select distinct customer_sub_class,customer_name_txt from @DB_LEVEL@_mdm_hub_gold.d_customer_header) dc_h on
+	left outer join (select distinct customer_sub_class,customer_name_txt from @DB_LEVEL@_mdm_hub_gold.d_customer_header
+	         where customer_class_code_txt = 'GLOBAL STRATEGIC ACCOUNT') dc_h on
 			  upper(aop_account_name) = upper(dc_h.customer_name_txt)
 			) s)s1)s2)s3;

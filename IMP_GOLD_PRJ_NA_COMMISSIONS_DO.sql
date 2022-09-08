@@ -1,5 +1,7 @@
 1.Populate_invoice_stage_table
 
+--RELEASE DATE: 06/09/2022
+
 INSERT
 	INTO
 	@DB_LEVEL@_na_cld_osc_gold.invoice_na_stg
@@ -87,10 +89,7 @@ sed.invoicedate,
 sed.invoicelinenumber,
 sed.invoicenumber,
 sed.legacysizecategory,
-sed.lesbilltomajorclass,
-sed.lesbilltominorclass,
 sed.alicecommissionoverridepercent,
-sed.lesunitsflag,
 sed.level_6,
 sed.listprice,
 sed.lob,
@@ -180,19 +179,7 @@ sed.shiptostandardizedname,
 sed.sizecategory,
 sed.sku,
 sed.skudescription,
-sed.smsbatteriesonlyflag,
-sed.smsbatteryrbsm,
-sed.smscontractenddate,
-sed.smscontractexpiredate,
-sed.smscontractpms,
-sed.smscontractsequence,
-sed.smscontractstartdate,
-sed.smscontractstatus,
 sed.smscustomertype,
-sed.smsequipmentsegment,
-sed.smssiteid,
-sed.smstagnumber,
-sed.smsticketnumber,
 sed.soldtocustomercustomertype1,
 sed.soldtocustomerenterpriseindustry,
 sed.soldtocustomergsc,
@@ -202,7 +189,6 @@ sed.soldtocustomerparentaccount,
 sed.soldtocustomerstandardizedname,
 sed.soldtocustomervertical,
 sed.sourceorder,
-sed.speed_dial,
 sed.yearmonth,
 '' namedaccountofficeassign,
 '' namedaccountsplit,
@@ -417,10 +403,7 @@ stg.invoicedate,
 stg.invoicelinenumber,
 stg.invoicenumber,
 stg.legacysizecategory,
-stg.lesbilltomajorclass,
-stg.lesbilltominorclass,
 stg.alicecommissionoverridepercent,
-stg.lesunitsflag,
 stg.level_6,
 stg.listprice,
 stg.lob,
@@ -510,19 +493,7 @@ stg.shiptostandardizedname,
 stg.sizecategory,
 stg.sku,
 stg.skudescription,
-stg.smsbatteriesonlyflag,
-stg.smsbatteryrbsm,
-stg.smscontractenddate,
-stg.smscontractexpiredate,
-stg.smscontractpms,
-stg.smscontractsequence,
-stg.smscontractstartdate,
-stg.smscontractstatus,
 stg.smscustomertype,
-stg.smsequipmentsegment,
-stg.smssiteid,
-stg.smstagnumber,
-stg.smsticketnumber,
 stg.soldtocustomercustomertype1,
 stg.soldtocustomerenterpriseindustry,
 stg.soldtocustomergsc,
@@ -532,7 +503,6 @@ stg.soldtocustomerparentaccount,
 stg.soldtocustomerstandardizedname,
 stg.soldtocustomervertical,
 stg.sourceorder,
-stg.speed_dial,
 stg.yearmonth,
 stg.namedaccountofficeassign,
 stg.namedaccountsplit,
@@ -654,7 +624,6 @@ select * from @DB_LEVEL@_na_cld_osc_gold.invoice_na_temp;
 
 truncate table @DB_LEVEL@_na_cld_osc_gold.invoice_na_temp;
 
-
 3.Rule2_logic_stg_temp_insert
 
 INSERT INTO @DB_LEVEL@_na_cld_osc_gold.invoice_na_temp
@@ -742,10 +711,7 @@ stg.invoicedate,
 stg.invoicelinenumber,
 stg.invoicenumber,
 stg.legacysizecategory,
-stg.lesbilltomajorclass,
-stg.lesbilltominorclass,
 stg.alicecommissionoverridepercent,
-stg.lesunitsflag,
 stg.level_6,
 stg.listprice,
 stg.lob,
@@ -835,19 +801,7 @@ stg.shiptostandardizedname,
 stg.sizecategory,
 stg.sku,
 stg.skudescription,
-stg.smsbatteriesonlyflag,
-stg.smsbatteryrbsm,
-stg.smscontractenddate,
-stg.smscontractexpiredate,
-stg.smscontractpms,
-stg.smscontractsequence,
-stg.smscontractstartdate,
-stg.smscontractstatus,
 stg.smscustomertype,
-stg.smsequipmentsegment,
-stg.smssiteid,
-stg.smstagnumber,
-stg.smsticketnumber,
 stg.soldtocustomercustomertype1,
 stg.soldtocustomerenterpriseindustry,
 stg.soldtocustomergsc,
@@ -857,7 +811,6 @@ stg.soldtocustomerparentaccount,
 stg.soldtocustomerstandardizedname,
 stg.soldtocustomervertical,
 stg.sourceorder,
-stg.speed_dial,
 stg.yearmonth,
 stg.namedaccountofficeassign,
 stg.namedaccountsplit,
@@ -1058,10 +1011,7 @@ intp.invoicedate,
 intp.invoicelinenumber,
 intp.invoicenumber,
 intp.legacysizecategory,
-intp.lesbilltomajorclass,
-intp.lesbilltominorclass,
 intp.alicecommissionoverridepercent,
-intp.lesunitsflag,
 intp.level_6,
 intp.listprice,
 intp.lob,
@@ -1151,19 +1101,7 @@ intp.shiptostandardizedname,
 intp.sizecategory,
 intp.sku,
 intp.skudescription,
-intp.smsbatteriesonlyflag,
-intp.smsbatteryrbsm,
-intp.smscontractenddate,
-intp.smscontractexpiredate,
-intp.smscontractpms,
-intp.smscontractsequence,
-intp.smscontractstartdate,
-intp.smscontractstatus,
 intp.smscustomertype,
-intp.smsequipmentsegment,
-intp.smssiteid,
-intp.smstagnumber,
-intp.smsticketnumber,
 intp.soldtocustomercustomertype1,
 intp.soldtocustomerenterpriseindustry,
 intp.soldtocustomergsc,
@@ -1173,7 +1111,6 @@ intp.soldtocustomerparentaccount,
 intp.soldtocustomerstandardizedname,
 intp.soldtocustomervertical,
 intp.sourceorder,
-intp.speed_dial,
 intp.yearmonth,
 intp.namedaccountofficeassign,
 intp.namedaccountsplit,
@@ -1373,10 +1310,7 @@ account_type
 ,invoicelinenumber
 ,invoicenumber
 ,legacysizecategory
-,lesbilltomajorclass
-,lesbilltominorclass
 ,alicecommissionoverridepercent
-,lesunitsflag
 ,level_6
 ,listprice
 ,lob
@@ -1466,19 +1400,7 @@ account_type
 ,sizecategory
 ,sku
 ,skudescription
-,smsbatteriesonlyflag
-,smsbatteryrbsm
-,smscontractenddate
-,smscontractexpiredate
-,smscontractpms
-,smscontractsequence
-,smscontractstartdate
-,smscontractstatus
 ,smscustomertype
-,smsequipmentsegment
-,smssiteid
-,smstagnumber
-,smsticketnumber
 ,soldtocustomercustomertype1
 ,soldtocustomerenterpriseindustry
 ,soldtocustomergsc
@@ -1488,7 +1410,6 @@ account_type
 ,soldtocustomerstandardizedname
 ,soldtocustomervertical
 ,sourceorder
-,speed_dial
 ,yearmonth
 ,namedaccountofficeassign
 ,namedaccountsplit
@@ -1674,10 +1595,7 @@ stg.account_type
 ,stg.invoicelinenumber
 ,stg.invoicenumber
 ,stg.legacysizecategory
-,stg.lesbilltomajorclass
-,stg.lesbilltominorclass
 ,stg.alicecommissionoverridepercent
-,stg.lesunitsflag
 ,stg.level_6
 ,stg.listprice
 ,stg.lob
@@ -1767,19 +1685,7 @@ stg.account_type
 ,stg.sizecategory
 ,stg.sku
 ,stg.skudescription
-,stg.smsbatteriesonlyflag
-,stg.smsbatteryrbsm
-,stg.smscontractenddate
-,stg.smscontractexpiredate
-,stg.smscontractpms
-,stg.smscontractsequence
-,stg.smscontractstartdate
-,stg.smscontractstatus
 ,stg.smscustomertype
-,stg.smsequipmentsegment
-,stg.smssiteid
-,stg.smstagnumber
-,stg.smsticketnumber
 ,stg.soldtocustomercustomertype1
 ,stg.soldtocustomerenterpriseindustry
 ,stg.soldtocustomergsc
@@ -1789,7 +1695,6 @@ stg.account_type
 ,stg.soldtocustomerstandardizedname
 ,stg.soldtocustomervertical
 ,stg.sourceorder
-,stg.speed_dial
 ,stg.yearmonth
 ,stg.namedaccountofficeassign
 ,stg.namedaccountsplit
@@ -1999,10 +1904,7 @@ invoicedate,
 invoicelinenumber,
 invoicenumber,
 legacysizecategory,
-lesbilltomajorclass,
-lesbilltominorclass,
 alicecommissionoverridepercent,
-lesunitsflag,
 level_6,
 listprice,
 lob,
@@ -2092,19 +1994,7 @@ shiptostandardizedname,
 sizecategory,
 sku,
 skudescription,
-smsbatteriesonlyflag,
-smsbatteryrbsm,
-smscontractenddate,
-smscontractexpiredate,
-smscontractpms,
-smscontractsequence,
-smscontractstartdate,
-smscontractstatus,
 smscustomertype,
-smsequipmentsegment,
-smssiteid,
-smstagnumber,
-smsticketnumber,
 soldtocustomercustomertype1,
 soldtocustomerenterpriseindustry,
 soldtocustomergsc,
@@ -2114,7 +2004,6 @@ soldtocustomerparentaccount,
 soldtocustomerstandardizedname,
 soldtocustomervertical,
 sourceorder,
-speed_dial,
 yearmonth,
 namedaccountofficeassign,
 namedaccountsplit,
@@ -2300,10 +2189,7 @@ temp.invoicedate as invoicedate,
 temp.invoicelinenumber as invoicelinenumber,
 temp.invoicenumber as invoicenumber,
 temp.legacysizecategory as legacysizecategory,
-temp.lesbilltomajorclass as lesbilltomajorclass,
-temp.lesbilltominorclass as lesbilltominorclass,
 temp.alicecommissionoverridepercent as alicecommissionoverridepercent,
-temp.lesunitsflag as lesunitsflag,
 temp.level_6 as level_6,
 temp.listprice as listprice,
 temp.lob as lob,
@@ -2393,19 +2279,7 @@ temp.shiptostandardizedname as shiptostandardizedname,
 temp.sizecategory as sizecategory,
 temp.sku as sku,
 temp.skudescription as skudescription,
-temp.smsbatteriesonlyflag as smsbatteriesonlyflag,
-temp.smsbatteryrbsm as smsbatteryrbsm,
-temp.smscontractenddate as smscontractenddate,
-temp.smscontractexpiredate as smscontractexpiredate,
-temp.smscontractpms as smscontractpms,
-temp.smscontractsequence as smscontractsequence,
-temp.smscontractstartdate as smscontractstartdate,
-temp.smscontractstatus as smscontractstatus,
 temp.smscustomertype as smscustomertype,
-temp.smsequipmentsegment as smsequipmentsegment,
-temp.smssiteid as smssiteid,
-temp.smstagnumber as smstagnumber,
-temp.smsticketnumber as smsticketnumber,
 temp.soldtocustomercustomertype1 as soldtocustomercustomertype1,
 temp.soldtocustomerenterpriseindustry as soldtocustomerenterpriseindustry,
 temp.soldtocustomergsc as soldtocustomergsc,
@@ -2415,7 +2289,6 @@ temp.soldtocustomerparentaccount as soldtocustomerparentaccount,
 temp.soldtocustomerstandardizedname as soldtocustomerstandardizedname,
 temp.soldtocustomervertical as soldtocustomervertical,
 temp.sourceorder as sourceorder,
-temp.speed_dial as speed_dial,
 temp.yearmonth as yearmonth,
 temp.namedaccountofficeassign as namedaccountofficeassign,
 temp.namedaccountsplit as namedaccountsplit,
@@ -2525,7 +2398,6 @@ from @DB_LEVEL@_na_cld_osc_gold.invoice_na_temp temp
 left outer join @DB_LEVEL@_edm_other_src_silver.rep_office_info roi
 on temp.salesofficenumber =roi.office_location
 ;
-
 
 7.stg_to_invoice_final
 
@@ -2647,38 +2519,12 @@ insert into @DB_LEVEL@_na_cld_osc_gold.commission_temp
 ,geistcustomernumber
 ,geistproductclass
 ,growth_target
-,internalofficefamily
-,internalofficename
-,internalofficenumber
-,internalofficeprincipalemail
-,internalofficeprincipalname
-,internalofficeregion
-,internalofficesplit
-,internalofficeterritory
-,internalofficetype
-,internalprincipalemail
-,internalprincipalname
-,internalsalesrepid
 ,invoicedate
 ,invoicelinenumber
 ,invoicenumber
 ,legacy
 ,legacysizecategory
-,lesbilltoaltindustrycode
-,lesbilltomajorclass
-,lesbilltominorclass
-,lesbilltostandardindustrycode
 ,alicecommissionoverridepercent
-,lescustomerindustrycodelevel1
-,lescustomerindustrycodelevel2
-,lescustomerindustrycodelevel3
-,lesdb2grouping
-,lesorderprefix
-,lespointofcalculation
-,lesproductdivisioncode
-,lessalesclass
-,lesshipmentnumber
-,lesunitsflag
 ,level6
 ,listprice
 ,listpricemondayticket
@@ -2829,28 +2675,8 @@ insert into @DB_LEVEL@_na_cld_osc_gold.commission_temp
 ,skudescription
 ,skumondayticket
 ,skutrimmed
-,sms_contract
-,smsbatteriesonlyflag
-,smsbatteryrbsm
-,smscallcode
-,smscontractenddate
-,smscontractexpiredate
-,smscontractmonths
-,smscontractpms
-,smscontractsequence
-,smscontractstartdate
-,smscontractstatus
-,smscoverageclass
 ,smscustomertype
-,smsequipmentsegment
 ,smsequipmentsequence
-,smsequipmentsubtype
-,smsequipmenttype
-,smssiteid
-,smstagnumber
-,smsticketcode
-,smsticketnumber
-,smstickettype
 ,soldtocustomeraddress
 ,soldtocustomercity
 ,soldtocustomercountry
@@ -2870,7 +2696,6 @@ insert into @DB_LEVEL@_na_cld_osc_gold.commission_temp
 ,sp2productexclusion
 ,sp2productflag
 ,sourceorder
-,speed_dial
 ,speed_dial2
 ,splitpercent
 ,standard_products
@@ -2961,6 +2786,7 @@ insert into @DB_LEVEL@_na_cld_osc_gold.commission_temp
 ,shiptocustomersubclass
 ,soldtocustomersubclass  --so-728 new attributes addition ends
 ,aop_customer_sub_class
+,serialnumber
 )
 select 
 '' 119_override
@@ -3061,38 +2887,12 @@ select
 ,'' geistcustomernumber
 ,'' geistproductclass
 ,growth_target
-,'' internalofficefamily
-,'' internalofficename
-,'' internalofficenumber
-,'' internalofficeprincipalemail
-,'' internalofficeprincipalname
-,'' internalofficeregion
-,'' internalofficesplit
-,'' internalofficeterritory
-,'' internalofficetype
-,'' internalprincipalemail
-,'' internalprincipalname
-,'' internalsalesrepid
 ,invoicedate
 ,invoicelinenumber
 ,invoicenumber
 ,'' legacy
 ,legacysizecategory
-,'' lesbilltoaltindustrycode
-,lesbilltomajorclass
-,lesbilltominorclass
-,'' lesbilltostandardindustrycode
 ,alicecommissionoverridepercent
-,'' lescustomerindustrycodelevel1
-,'' lescustomerindustrycodelevel2
-,'' lescustomerindustrycodelevel3
-,'' lesdb2grouping
-,'' lesorderprefix
-,'' lespointofcalculation
-,'' lesproductdivisioncode
-,'' lessalesclass
-,'' lesshipmentnumber
-,lesunitsflag
 ,level_6 as level6
 ,listprice
 ,'' listpricemondayticket
@@ -3248,28 +3048,8 @@ select
 ,skudescription
 ,'' skumondayticket
 ,'' skutrimmed
-,'' sms_contract
-,smsbatteriesonlyflag
-,smsbatteryrbsm
-,'' smscallcode
-,smscontractenddate
-,smscontractexpiredate
-,'' smscontractmonths
-,smscontractpms
-,smscontractsequence
-,smscontractstartdate
-,smscontractstatus
-,'' smscoverageclass
 ,smscustomertype
-,smsequipmentsegment
 ,'' smsequipmentsequence
-,'' smsequipmentsubtype
-,'' smsequipmenttype
-,smssiteid
-,smstagnumber
-,'' smsticketcode
-,smsticketnumber
-,'' smstickettype
 ,soldtocustomeraddress
 ,soldtocustomercity
 ,soldtocustomercountry
@@ -3289,7 +3069,6 @@ select
 ,'' sp2productexclusion
 ,sp2productflag
 ,sourceorder
-,speed_dial
 ,'' speed_dial2
 ,splitpercent
 ,'' standard_products
@@ -3380,6 +3159,7 @@ select
 ,shiptocustomersubclass
 ,soldtocustomersubclass  --so-728 new attributes addition ends
 ,aop_customer_sub_class
+,'' serialnumber
 from @DB_LEVEL@_na_cld_osc_gold.invoice_na_final
 WHERE (billtocustomername not like "%INGRAM MICRO%"
 and billtocustomername not like "%TECH DATA%" 
@@ -3493,38 +3273,12 @@ select
 ,geistcustomernumber
 ,geistproductclass
 ,growth_target
-,internalofficefamily
-,internalofficename
-,internalofficenumber
-,internalofficeprincipalemail
-,internalofficeprincipalname
-,internalofficeregion
-,internalofficesplit
-,internalofficeterritory
-,internalofficetype
-,internalprincipalemail
-,internalprincipalname
-,internalsalesrepid
 ,invoicedate
 ,invoicelinenumber
 ,invoicenumber
 ,legacy
 ,legacysizecategory
-,lesbilltoaltindustrycode
-,lesbilltomajorclass
-,lesbilltominorclass
-,lesbilltostandardindustrycode
 ,alicecommissionoverridepercent
-,lescustomerindustrycodelevel1
-,lescustomerindustrycodelevel2
-,lescustomerindustrycodelevel3
-,lesdb2grouping
-,lesorderprefix
-,lespointofcalculation
-,lesproductdivisioncode
-,lessalesclass
-,lesshipmentnumber
-,lesunitsflag
 ,level6
 ,listprice
 ,listpricemondayticket
@@ -3675,28 +3429,8 @@ select
 ,skudescription
 ,skumondayticket
 ,skutrimmed
-,sms_contract
-,smsbatteriesonlyflag
-,smsbatteryrbsm
-,smscallcode
-,smscontractenddate
-,smscontractexpiredate
-,smscontractmonths
-,smscontractpms
-,smscontractsequence
-,smscontractstartdate
-,smscontractstatus
-,smscoverageclass
 ,smscustomertype
-,smsequipmentsegment
 ,smsequipmentsequence
-,smsequipmentsubtype
-,smsequipmenttype
-,smssiteid
-,smstagnumber
-,smsticketcode
-,smsticketnumber
-,smstickettype
 ,soldtocustomeraddress
 ,soldtocustomercity
 ,soldtocustomercountry
@@ -3716,7 +3450,6 @@ select
 ,sp2productexclusion
 ,sp2productflag
 ,sourceorder
-,speed_dial
 ,speed_dial2
 ,splitpercent
 ,standard_products
@@ -3806,6 +3539,7 @@ select
 ,shiptocustomersubclass
 ,soldtocustomersubclass  --so-728 new attributes addition ends
 ,aop_customer_sub_class
+,serialnumber
 from (
   SELECT
 	*,
@@ -4149,38 +3883,12 @@ from (select
 ,ps.gbu
 ,'' geistcustomernumber
 ,'' geistproductclass
-,ps.internalofficefamily
-,ps.internalofficename
-,ps.internalofficenumber
-,ps.internalofficeprincipalemail
-,ps.internalofficeprincipalname
-,ps.internalofficeregion
-,ps.internalofficesplit
-,ps.internalofficeterritory
-,ps.internalofficetype
-,ps.internalprincipalemail
-,ps.internalprincipalname
-,'' internalsalesrepid
 ,ps.invoicedate
 ,ps.invoicelinenumber
 ,ps.invoicenumber
 ,'' legacy
 ,'' legacysizecategory
-,'' lesbilltoaltindustrycode
-,'' lesbilltomajorclass
-,'' lesbilltominorclass
-,'' lesbilltostandardindustrycode
 ,'' alicecommissionoverridepercent
-,'' lescustomerindustrycodelevel1
-,'' lescustomerindustrycodelevel2
-,'' lescustomerindustrycodelevel3
-,'' lesdb2grouping
-,'' lesorderprefix
-,'' lespointofcalculation
-,'' lesproductdivisioncode
-,'' lessalesclass
-,'' lesshipmentnumber
-,'' lesunitsflag
 ,ps.level6
 ,ps.listprice
 ,'' listpricemondayticket
@@ -4327,28 +4035,8 @@ from (select
 ,ps.skudescription
 ,'' skumondayticket
 ,'' skutrimmed
-,'' sms_contract
-,'' smsbatteriesonlyflag
-,'' smsbatteryrbsm
-,'' smscallcode
-,'' smscontractenddate
-,'' smscontractexpiredate
-,'' smscontractmonths
-,'' smscontractpms
-,'' smscontractsequence
-,'' smscontractstartdate
-,'' smscontractstatus
-,'' smscoverageclass
 ,'' smscustomertype
-,'' smsequipmentsegment
 ,'' smsequipmentsequence
-,'' smsequipmentsubtype
-,'' smsequipmenttype
-,'' smssiteid
-,'' smstagnumber
-,'' smsticketcode
-,'' smsticketnumber
-,'' smstickettype
 ,'' soldtocustomeraddress
 ,ps.soldtocustomercity
 ,ps.soldtocustomercountry
@@ -4368,7 +4056,6 @@ from (select
 ,'' sp2productexclusion
 ,ps.sp2productflag
 ,'' sourceorder
-,ps.speed_dial
 ,'' speed_dial2
 ,ps.splitpercent
 ,ps.standard_products
@@ -4470,7 +4157,8 @@ ps.billtocustomersubclass, --so-728 new attributes addition starts
 ps.endcustomersubclass,
 ps.shiptocustomersubclass,
 ps.soldtocustomersubclass,  --so-728 new attributes addition ends
-'' aop_customer_sub_class
+'' aop_customer_sub_class,
+ps.serialnumber
 
 
 from (select * from @DB_LEVEL@_na_cld_osc_gold.pos_na where intrachannelflag <> 'YES' and recordsource <> 'CONTEXT_POWER & TEL') ps
@@ -4646,38 +4334,12 @@ gbu ,
 geistcustomernumber ,
 geistproductclass ,
 growth_target ,
-internalofficefamily ,
-internalofficename ,
-internalofficenumber ,
-internalofficeprincipalemail ,
-internalofficeprincipalname ,
-internalofficeregion ,
-internalofficesplit ,
-internalofficeterritory ,
-internalofficetype ,
-internalprincipalemail ,
-internalprincipalname ,
-internalsalesrepid ,
 invoicedate ,
 invoicelinenumber ,
 invoicenumber ,
 legacy ,
 legacysizecategory ,
-lesbilltoaltindustrycode ,
-lesbilltomajorclass ,
-lesbilltominorclass ,
-lesbilltostandardindustrycode ,
 alicecommissionoverridepercent ,
-lescustomerindustrycodelevel1 ,
-lescustomerindustrycodelevel2 ,
-lescustomerindustrycodelevel3 ,
-lesdb2grouping ,
-lesorderprefix ,
-lespointofcalculation ,
-lesproductdivisioncode ,
-lessalesclass ,
-lesshipmentnumber ,
-lesunitsflag ,
 level6 ,
 listprice ,
 listpricemondayticket ,
@@ -4828,28 +4490,8 @@ sku ,
 skudescription ,
 skumondayticket ,
 skutrimmed ,
-sms_contract ,
-smsbatteriesonlyflag ,
-smsbatteryrbsm ,
-smscallcode ,
-smscontractenddate ,
-smscontractexpiredate ,
-smscontractmonths ,
-smscontractpms ,
-smscontractsequence ,
-smscontractstartdate ,
-smscontractstatus ,
-smscoverageclass ,
 smscustomertype ,
-smsequipmentsegment ,
 smsequipmentsequence ,
-smsequipmentsubtype ,
-smsequipmenttype ,
-smssiteid ,
-smstagnumber ,
-smsticketcode ,
-smsticketnumber ,
-smstickettype ,
 soldtocustomeraddress ,
 soldtocustomercity ,
 soldtocustomercountry ,
@@ -4869,7 +4511,6 @@ sp1productflag ,
 sp2productexclusion ,
 sp2productflag ,
 sourceorder ,
-speed_dial ,
 speed_dial2 ,
 splitpercent ,
 standard_products ,
@@ -4959,7 +4600,8 @@ billtocustomersubclass, --so-728 new attributes addition starts
 endcustomersubclass,
 shiptocustomersubclass,
 soldtocustomersubclass,  --so-728 new attributes addition ends
-aop_customer_sub_class
+aop_customer_sub_class,
+serialnumber
 )
 select
 119_override ,
@@ -5065,38 +4707,12 @@ ct.gbu ,
 gil.custno geistcustomernumber , --Enrichment mapped from giest_invoice_line
 ct.geistproductclass ,
 ct.growth_target ,
-ct.internalofficefamily ,
-ct.internalofficename ,
-ct.internalofficenumber ,
-ct.internalofficeprincipalemail ,
-ct.internalofficeprincipalname ,
-ct.internalofficeregion ,
-ct.internalofficesplit ,
-ct.internalofficeterritory ,
-ct.internalofficetype ,
-ct.internalprincipalemail ,
-ct.internalprincipalname ,
-ct.internalsalesrepid ,
 ct.invoicedate ,
 ct.invoicelinenumber ,
 ct.invoicenumber ,
 ct.legacy ,
 ct.legacysizecategory ,
-ct.lesbilltoaltindustrycode ,
-ct.lesbilltomajorclass ,
-ct.lesbilltominorclass ,
-ct.lesbilltostandardindustrycode ,
 ct.alicecommissionoverridepercent ,
-ct.lescustomerindustrycodelevel1 ,
-ct.lescustomerindustrycodelevel2 ,
-ct.lescustomerindustrycodelevel3 ,
-ct.lesdb2grouping ,
-ct.lesorderprefix ,
-ct.lespointofcalculation ,
-ct.lesproductdivisioncode ,
-ct.lessalesclass ,
-ct.lesshipmentnumber ,
-ct.lesunitsflag ,
 ct.level6 ,
 ct.listprice ,
 ct.listpricemondayticket ,
@@ -5247,28 +4863,8 @@ ct.sku ,
 ct.skudescription ,
 ct.skumondayticket ,
 ct.skutrimmed ,
-ct.sms_contract ,
-ct.smsbatteriesonlyflag ,
-ct.smsbatteryrbsm ,
-ct.smscallcode ,
-ct.smscontractenddate ,
-ct.smscontractexpiredate ,
-ct.smscontractmonths ,
-ct.smscontractpms ,
-ct.smscontractsequence ,
-ct.smscontractstartdate ,
-ct.smscontractstatus ,
-ct.smscoverageclass ,
 ct.smscustomertype ,
-ct.smsequipmentsegment ,
 ct.smsequipmentsequence ,
-ct.smsequipmentsubtype ,
-ct.smsequipmenttype ,
-ct.smssiteid ,
-ct.smstagnumber ,
-ct.smsticketcode ,
-ct.smsticketnumber ,
-ct.smstickettype ,
 ct.soldtocustomeraddress ,
 ct.soldtocustomercity ,
 ct.soldtocustomercountry ,
@@ -5288,7 +4884,6 @@ ct.sp1productflag ,
 ct.sp2productexclusion ,
 ct.sp2productflag ,
 ct.sourceorder ,
-ct.speed_dial ,
 ct.speed_dial2 ,
 ct.splitpercent ,
 ct.standard_products ,
@@ -5382,7 +4977,8 @@ ct.billtocustomersubclass, --so-728 new attributes addition starts
 ct.endcustomersubclass,
 ct.shiptocustomersubclass,
 ct.soldtocustomersubclass,  --so-728 new attributes addition ends
-ct.aop_customer_sub_class
+ct.aop_customer_sub_class,
+ct.serialnumber
 
 from 
 @DB_LEVEL@_na_cld_osc_gold.commission_temp ct
@@ -5399,4 +4995,3 @@ on ct.endcustomerid = cc.context_id
 truncate table @DB_LEVEL@_na_cld_osc_gold.commission_temp ;
 
 invalidate metadata @DB_LEVEL@_na_cld_osc_gold.commission_data_na ;
-
