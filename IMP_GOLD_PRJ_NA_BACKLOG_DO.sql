@@ -1,5 +1,7 @@
 1.INVALIDATE _ METADATA
 
+--RELEASE DATE : 06/09/2022
+
 invalidate metadata @DB_LEVEL@_na_cld_osc_gold.backlog_consolidated_data_na;
 invalidate metadata @DB_LEVEL@_edm_gold.f_sales_order_line_backlog_history;
 invalidate metadata @DB_LEVEL@_edm_gold.f_sales_invoice_line;
@@ -37,6 +39,8 @@ invalidate metadata @DB_LEVEL@_edm_other_src_silver.usa_pos_cd_lst;
 invalidate metadata @DB_LEVEL@_ora_alice_silver.alice_oe_order_lines_all;
 invalidate metadata @DB_LEVEL@_ora_alice_silver.alice_oe_order_headers_all;
 invalidate metadata @DB_LEVEL@_edm_other_src_silver.ref_sellingmotion_accounts;
+
+
 
 2.INSERT_BACKLOG
 
@@ -453,7 +457,7 @@ CASE
 	    WHEN aop_account_name = 'DELL' THEN 'NULL'
 		WHEN nvl(dc_h.customer_sub_class, 'N') != 'N' THEN dc_h.customer_sub_class
 		WHEN nvl(b.sm_sku, 'N') != 'N'  THEN 'OEM'
-		ELSE 'NULL'
+		--ELSE 'NULL'
 	END aop_customer_sub_class
 		
 FROM
@@ -1108,7 +1112,7 @@ FROM
 -- and blh.src_system_name =prod.src_system_name
         left outer join (Select distinct project_id,class_category,class_code from @DB_LEVEL@_ora_alice_silver.alice_pa_project_classes 
                where class_category = 'Project Category' and  class_code between '110' and '119' ) prc on
-                                  pm.projectid = prc.project_id
+                                  ordr.project_id = prc.project_id
 
 /*New customer hub changes */
 	left outer join @DB_LEVEL@_mdm_hub_gold.d_customer_header_v ship_acc
@@ -1633,7 +1637,8 @@ nvl(bill_acc.customer_number,bill_acc_leg.account_num) = h.Business_Nbr
           where  item_eff.context_code like '%OEM%'
           and user_item_type = 'Finished Good')so on a.sku = so.item_number
 		) b 
-		left outer join (select distinct customer_sub_class,customer_name_txt from @DB_LEVEL@_mdm_hub_gold.d_customer_header) dc_h on
+		left outer join (select distinct customer_sub_class,customer_name_txt from @DB_LEVEL@_mdm_hub_gold.d_customer_header
+		where customer_class_code_txt = 'GLOBAL STRATEGIC ACCOUNT') dc_h on
 			  upper(aop_account_name) = upper(dc_h.customer_name_txt)
 		)dt )tt )st)s1;
 			
